@@ -1,4 +1,5 @@
 import { bundleBaseUrl, fetchJson } from '../api/http';
+import { warmFetch } from '../api/asset-cache';
 import { bootText } from '../i18n/boot-messages';
 import { FALLBACK_LOCALE } from '../i18n/messages';
 
@@ -7,27 +8,24 @@ function joinBase(baseUrl: string, rel: string) {
   return `${base}${rel.replace(/^\//, '')}`;
 }
 
-async function warmFetch(url: string) {
-  try {
-    await fetch(url);
-  } catch {
-  }
-}
-
 export async function warmBundleAssets(
   baseUrl: string,
   locale: string,
   onStatus?: (message: string) => void,
 ) {
+  let usedCache = false;
+
   onStatus?.(bootText(locale, 'bootLoadingBundle'));
-  await warmFetch(joinBase(baseUrl, 'bundle.json'));
+  if (await warmFetch(joinBase(baseUrl, 'bundle.json'))) usedCache = true;
 
   const activeLocale = locale || FALLBACK_LOCALE;
   const langCodes = new Set([FALLBACK_LOCALE]);
   if (activeLocale !== FALLBACK_LOCALE) langCodes.add(activeLocale);
 
   onStatus?.(bootText(locale, 'bootLoadingLang'));
-  await Promise.all([...langCodes].map((code) => warmFetch(joinBase(baseUrl, `lang/${code}.json`))));
+  for (const code of langCodes) {
+    if (await warmFetch(joinBase(baseUrl, `lang/${code}.json`))) usedCache = true;
+  }
 
   onStatus?.(bootText(locale, 'bootLoadingIcons'));
   type IconIndex = {
@@ -42,12 +40,13 @@ export async function warmBundleAssets(
     joinBase(baseUrl, 'icons/index.json'),
     null,
   );
-  await Promise.all([
+  const iconWarm = await Promise.all([
     warmFetch(joinBase(baseUrl, 'icons/icons.css')),
     warmFetch(joinBase(baseUrl, 'textures/manifest.json')),
     warmFetch(joinBase(baseUrl, 'textures/emi/textures/gui/background.png')),
     warmFetch(joinBase(baseUrl, 'textures/emi/textures/gui/widgets.png')),
   ]);
+  if (iconWarm.some(Boolean)) usedCache = true;
 
   const preloadUrls: string[] = [];
   const pages = Array.isArray(index?.pages) ? index.pages : [];
@@ -65,16 +64,17 @@ export async function warmBundleAssets(
 
   if (preloadUrls.length > 0) {
     onStatus?.(bootText(locale, 'bootWarmingAtlas'));
-    await Promise.all(preloadUrls.map((url) => warmFetch(url)));
+    const atlasWarm = await Promise.all(preloadUrls.map((url) => warmFetch(url)));
+    if (atlasWarm.some(Boolean)) usedCache = true;
   }
 
   onStatus?.(bootText(locale, 'bootLoadingSearch'));
-  await warmFetch(joinBase(baseUrl, `items-lang/${activeLocale}.json`));
+  if (await warmFetch(joinBase(baseUrl, `items-lang/${activeLocale}.json`))) usedCache = true;
   if (activeLocale !== FALLBACK_LOCALE) {
-    await warmFetch(joinBase(baseUrl, `items-lang/${FALLBACK_LOCALE}.json`));
+    if (await warmFetch(joinBase(baseUrl, `items-lang/${FALLBACK_LOCALE}.json`))) usedCache = true;
   }
 
-  onStatus?.(bootText(locale, 'bootEntering'));
+  onStatus?.(bootText(locale, 'bootEntering', { cachedHint: usedCache ? bootText(locale, 'cacheHint') : '' }));
 }
 
 export async function warmBundleById(

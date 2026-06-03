@@ -22,7 +22,10 @@ export function AppBootOverlay({ locale, progress, status, hidden }: AppBootOver
       <div className="app-boot-card">
         <p className="app-boot-title">{resolveUiMessages(locale).appTitle}</p>
         <div className="app-boot-progress" aria-hidden="true">
-          <div className="app-boot-progress-fill" style={{ width: `${pct}%` }} />
+          <div className="app-boot-progress-fill" style={{ width: `${pct}%` }}>
+            <span className="app-boot-progress-gleam" />
+          </div>
+          <span className="app-boot-progress-track-shimmer" />
         </div>
         {status ? <p className="app-boot-status">{status}</p> : null}
       </div>

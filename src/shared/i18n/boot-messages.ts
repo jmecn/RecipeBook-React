@@ -10,7 +10,8 @@ const BOOT_TEXT = {
     bootLoadingItemsIndex: 'Loading items index...',
     bootLoadingSearch: 'Loading item search index...',
     bootApplyingIconStyles: 'Applying icon styles...',
-    bootEntering: 'Entering...',
+    bootEntering: 'Entering...{cachedHint}',
+    cacheHint: ' (cached)',
   },
   zh_cn: {
     bootReadingConfig: '正在读取站点配置…',
@@ -21,11 +22,25 @@ const BOOT_TEXT = {
     bootLoadingItemsIndex: '正在加载物品索引…',
     bootLoadingSearch: '正在加载物品搜索索引…',
     bootApplyingIconStyles: '正在应用图标样式…',
-    bootEntering: '正在进入…',
+    bootEntering: '正在进入…{cachedHint}',
+    cacheHint: '（已缓存）',
   },
 } as const;
 
-export function bootText(locale: string, key: string) {
+export function bootText(
+  locale: string,
+  key: string,
+  vars?: Record<string, string>,
+) {
   const lang = uiLocale(locale);
-  return BOOT_TEXT[lang]?.[key as keyof typeof BOOT_TEXT.en_us] ?? BOOT_TEXT.en_us[key as keyof typeof BOOT_TEXT.en_us] ?? key;
+  let text: string =
+    BOOT_TEXT[lang]?.[key as keyof typeof BOOT_TEXT.en_us]
+    ?? BOOT_TEXT.en_us[key as keyof typeof BOOT_TEXT.en_us]
+    ?? key;
+  if (vars) {
+    for (const [name, value] of Object.entries(vars)) {
+      text = text.split(`{${name}}`).join(value);
+    }
+  }
+  return text;
 }

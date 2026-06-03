@@ -35,6 +35,7 @@ body.is-booting #viewer-main {
 }
 
 .app-boot-progress {
+  position: relative;
   width: min(280px, 70vw);
   height: 8px;
   border-radius: 999px;
@@ -43,7 +44,24 @@ body.is-booting #viewer-main {
   overflow: hidden;
 }
 
+.app-boot-progress-track-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--accent) 35%, transparent) 45%,
+    color-mix(in srgb, var(--accent) 55%, transparent) 55%,
+    transparent 100%
+  );
+  animation: app-boot-track-shimmer 1.35s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .app-boot-progress-fill {
+  position: relative;
+  z-index: 1;
   width: 0%;
   height: 100%;
   border-radius: inherit;
@@ -53,6 +71,48 @@ body.is-booting #viewer-main {
     var(--accent) 100%
   );
   transition: width 220ms ease;
+  overflow: hidden;
+}
+
+.app-boot-progress-gleam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, white 55%, var(--accent)) 50%,
+    transparent 100%
+  );
+  animation: app-boot-fill-gleam 1s ease-in-out infinite;
+}
+
+@keyframes app-boot-track-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes app-boot-fill-gleam {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-boot-progress-track-shimmer,
+  .app-boot-progress-gleam {
+    animation: none;
+  }
 }
 
 .app-boot-status {
