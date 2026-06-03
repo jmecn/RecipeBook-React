@@ -23,7 +23,9 @@ export function getStoredTheme(): Theme | null {
 export function setStoredTheme(theme: Theme) {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
-  } catch {}
+  } catch {
+    return;
+  }
 }
 
 export function resolveInitialTheme(): Theme {

@@ -385,7 +385,9 @@ class EmiRendererClientImpl implements EmiRendererClient {
       try {
         const meta = await renderer.loadRecipeMeta(recipeId);
         layouts.push(rowStrideFromMeta(meta, imageScale));
-      } catch {}
+      } catch {
+        continue;
+      }
     }
     return mergeCategoryLayouts(layouts);
   }
