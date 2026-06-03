@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+
+# Vite / production build
+dist/
+dist-ssr/
+release/
+
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite cache
+.vite/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment (secrets)
+.env
+.env.*
+!.env.example
+
+# EMI export data (symlink or copy locally; see README)
+public/bundles/**
+!public/bundles/.gitkeep
+dist/bundles/**
+!dist/bundles/.gitkeep
+
+# Coverage
+coverage/
+
+# Editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Optional local export paths (if copied beside the app)
+export-raw/
+export-opt/

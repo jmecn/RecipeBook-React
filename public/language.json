@@ -1,0 +1,29 @@
+{
+  "defaultLocale": "en_us",
+  "enabledLocales": [
+    "en_us",
+    "zh_cn",
+    "zh_tw",
+    "ja_jp",
+    "ko_kr",
+    "ru_ru",
+    "de_de",
+    "fr_fr",
+    "es_es",
+    "pt_br",
+    "pl_pl"
+  ],
+  "localeNames": {
+    "en_us": "English (US)",
+    "zh_cn": "简体中文",
+    "zh_tw": "繁體中文",
+    "ja_jp": "日本語",
+    "ko_kr": "한국어",
+    "ru_ru": "Русский",
+    "de_de": "Deutsch",
+    "fr_fr": "Français",
+    "es_es": "Español",
+    "pt_br": "Português (Brasil)",
+    "pl_pl": "Polski"
+  }
+}

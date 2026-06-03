@@ -1,0 +1,12 @@
+/* EMI overlay typography; colors come from emi-recipe-renderer theme API (--emi-* tokens). */
+
+#tooltip,
+.tag-popover,
+.tag-popover * {
+  font-family: var(--tfg-font-sans);
+}
+
+.tag-popover .emi-slot-count,
+.tag-popover .emi-slot-count-fluid {
+  font-family: var(--tfg-font-mono);
+}

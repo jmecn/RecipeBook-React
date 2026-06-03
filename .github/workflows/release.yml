@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and build
+        run: npm run build
+
+      - name: Match package.json version to tag
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          TAG_NO_V="${TAG#v}"
+          if [ "$PKG_VERSION" != "$TAG_NO_V" ]; then
+            echo "::error::Tag ${TAG} must match package.json version (${PKG_VERSION}). Bump version then tag v${PKG_VERSION}."
+            exit 1
+          fi
+          echo "version=${PKG_VERSION}" >> "$GITHUB_OUTPUT"
+        id: version
+
+      - name: Package site artifact
+        run: node scripts/package-release.mjs
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release/tfg-recipe-viewer-site-v${{ steps.version.outputs.version }}.tar.gz
+            release/tfg-recipe-viewer-site-v${{ steps.version.outputs.version }}.zip

@@ -1,0 +1,129 @@
+.item-grid {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  align-items: stretch;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+@media (max-width: 1400px) {
+  .item-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .item-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 940px) {
+  .item-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .item-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.item-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(8px, 1.5vw, 10px);
+  width: 100%;
+  min-width: 0;
+  padding: clamp(6px, 1.2vw, 8px) clamp(8px, 1.5vw, 10px);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
+}
+
+@media (max-width: 420px) {
+  .item-card-name {
+    font-size: 0.85rem;
+  }
+
+  .item-card-id {
+    font-size: 0.65rem;
+  }
+}
+
+.item-card:hover,
+.item-card:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.item-card--static {
+  cursor: default;
+}
+
+.item-card--static:hover,
+.item-card--static:focus-visible {
+  border-color: var(--border);
+}
+
+.item-card-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-card-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.item-card-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-card-name {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-card-id {
+  margin: 2px 0 0;
+  font-family: var(--tfg-font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-list-page .app-empty {
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
