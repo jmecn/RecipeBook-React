@@ -67,8 +67,6 @@ export function SiteHeader() {
   const bundleMetaQuery = useBundleMetaQuery(effectiveBundle);
   const locales = visibleLocales(langConfigQuery.data, bundleMetaQuery.data?.languages);
 
-  // Match legacy populateLocaleSelect: clamp only after bundle.json languages are known.
-  // Before that, placeholder meta is en_us-only and would wrongly override ?lang=zh_cn.
   useEffect(() => {
     if (!effectiveBundle || bundleMetaQuery.isLoading) return;
     if (locales.length === 0) return;

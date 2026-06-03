@@ -31,9 +31,7 @@ function doubleAnimationFrame() {
 }
 
 interface LocaleSwitchContextValue {
-  /** Navigate `?lang=` only (no overlay) — for route correction on load. */
   setRouteLocale: (next: string) => void;
-  /** User-initiated locale change with legacy transition overlay. */
   switchLocale: (next: string) => Promise<void>;
 }
 

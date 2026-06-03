@@ -16,7 +16,6 @@ export function scrollViewportHeight(scrollEl: HTMLElement) {
   return maxReasonable;
 }
 
-/** Reliable offset using layout boxes (offsetParent walk breaks with nested scroll/flex). */
 export function offsetTopInScrollParent(el: HTMLElement, scrollParent: HTMLElement) {
   return el.getBoundingClientRect().top
     - scrollParent.getBoundingClientRect().top
@@ -46,7 +45,6 @@ export function computeRecipeVirtualWindow(options: {
   const totalRows = Math.ceil(recipeIds.length / cols);
   const viewportHeight = scrollViewportHeight(scrollEl);
 
-  // Do NOT clamp viewTop to a synthetic max — that freezes the window while scroll continues.
   const viewTop = Math.max(0, scrollEl.scrollTop - containerTop);
   const viewBottom = viewTop + viewportHeight;
 

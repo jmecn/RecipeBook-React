@@ -11,7 +11,6 @@ async function warmFetch(url: string) {
   try {
     await fetch(url);
   } catch {
-    // ignore preload failures
   }
 }
 

@@ -17,10 +17,6 @@ import {
   type CategoryRecipeLayout,
 } from '../../features/item-detail/lib/category-recipe-layout';
 
-/**
- * Adapter boundary for emi-recipe-renderer.
- * Keep all third-party imperative mounting logic behind this interface.
- */
 export interface IconMountSession {
   disconnect(): void;
   flush(): Promise<void>;
@@ -29,7 +25,6 @@ export interface IconMountSession {
 export interface MountItemIconOptions {
   itemId: string;
   fallbackText?: string;
-  /** When set, configure the renderer for this bundle before mounting. */
   baseUrl?: string;
   locale?: string;
 }
@@ -38,7 +33,6 @@ export interface MountCategoryIconOptions {
   categoryId: string;
   baseUrl?: string;
   locale?: string;
-  /** Atlas cell size from categories/index.json (typically 32). */
   iconCellSize?: number;
 }
 
@@ -56,7 +50,6 @@ export interface ConfigureEmiRendererOptions {
   onTagClick?: EmiRendererOptions['onTagClick'];
 }
 
-/** EMI instance methods used by the adapter but not yet on the published d.ts surface. */
 type EmiRendererWithIcons = EmiRecipeRenderer & {
   onItemClick?: EmiRendererOptions['onItemClick'];
   onTagClick?: EmiRendererOptions['onTagClick'];
@@ -128,7 +121,7 @@ async function ensureIconResources(renderer: EmiRendererWithIcons) {
 }
 
 class EmiRendererClientImpl implements EmiRendererClient {
-  baseUrl = '/bundles/';
+  baseUrl = '';
   locale = 'zh_cn';
   theme: EmiThemeName = 'dark';
   registryLabels: Record<string, string> = {};
@@ -392,9 +385,7 @@ class EmiRendererClientImpl implements EmiRendererClient {
       try {
         const meta = await renderer.loadRecipeMeta(recipeId);
         layouts.push(rowStrideFromMeta(meta, imageScale));
-      } catch {
-        // skip missing meta
-      }
+      } catch {}
     }
     return mergeCategoryLayouts(layouts);
   }

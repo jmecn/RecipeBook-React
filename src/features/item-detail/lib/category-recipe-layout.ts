@@ -9,7 +9,6 @@ export interface CategoryRecipeLayout {
   stageWidth: number;
   stageHeight: number;
   rowStride: number;
-  /** Full card width incl. padding + border — used for column count. */
   cardOuterWidth: number;
 }
 

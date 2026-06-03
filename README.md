@@ -1,11 +1,11 @@
 # TFG Recipe Viewer
 
-Web viewer for EMI-exported recipe bundles. Built with React, TypeScript, and [emi-recipe-renderer](https://www.npmjs.com/package/emi-recipe-renderer). Routing uses query parameters only (`/` + `?item=`, `?tag=`, `?recipe=`, `?lang=`, `?bundle=`, etc.).
+EMI recipe bundle viewer (React + [emi-recipe-renderer](https://www.npmjs.com/package/emi-recipe-renderer)). Query-string routing: `?item=`, `?tag=`, `?recipe=`, `?lang=`, `?bundle=`.
 
 ## Prerequisites
 
-- Node.js 24+ (see `.nvmrc`; required by `emi-recipe-renderer`)
-- An EMI export bundle under `public/bundles/` (symlink or copy, e.g. `public/bundles/tfg-0.12.8`)
+- Node.js 24+ (`.nvmrc`)
+- Bundle under `public/bundles/` (e.g. `public/bundles/tfg-0.12.8`)
 
 ## Development
 
@@ -13,8 +13,6 @@ Web viewer for EMI-exported recipe bundles. Built with React, TypeScript, and [e
 npm install
 npm run dev
 ```
-
-Open `http://localhost:5173`.
 
 ## Build
 

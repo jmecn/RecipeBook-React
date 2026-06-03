@@ -9,6 +9,7 @@ import { getActiveTheme } from '../lib/theme';
 import { loadItemsCatalog } from '../../features/item-list/model/queries';
 import { loadItemsLangPayload } from '../../features/item-list/model/items-lang';
 import { loadCategoriesManifest } from '../../features/item-detail/model/categories';
+import { siteUrl } from '../lib/site-base';
 import { warmBundleById } from './warm-bundle';
 
 interface BundlesManifest {
@@ -21,8 +22,8 @@ export async function runAppBoot(onStatus: (message: string) => void) {
   const locale = resolveAppLocale();
 
   onStatus(bootText(locale, 'bootReadingConfig'));
-  await fetchJson('/language.json', null);
-  const manifest = await fetchJson<BundlesManifest>('/bundles.json', {
+  await fetchJson(siteUrl('language.json'), null);
+  const manifest = await fetchJson<BundlesManifest>(siteUrl('bundles.json'), {
     default: undefined,
     bundles: [],
   });

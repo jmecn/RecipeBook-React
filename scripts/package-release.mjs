@@ -1,7 +1,3 @@
-/**
- * After `npm run build`, produce a GitHub Release site tarball and manifest
- * for downstream workflows (e.g. TFG-Recipe-Viewer Deploy Pages).
- */
 import fs from 'node:fs'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -28,9 +24,7 @@ try {
   const resolved = lock.packages?.['node_modules/emi-recipe-renderer']?.version
     || lock.dependencies?.['emi-recipe-renderer']?.version
   rendererVersion = resolved ? String(resolved) : ''
-} catch {
-  // optional
-}
+} catch {}
 
 const manifest = {
   name: pkg.name,
@@ -38,7 +32,6 @@ const manifest = {
   rendererVersion,
   node: fs.readFileSync(path.join(root, '.nvmrc'), 'utf8').trim(),
   builtAt: new Date().toISOString(),
-  /** Extract tarball so index.html is at the deploy root. */
   layout: 'dist-root',
 }
 

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchJson } from '../api/http';
+import { siteUrl } from '../lib/site-base';
 import {
   FALLBACK_LOCALE,
   normalizeLocale,
@@ -59,7 +60,7 @@ export function useLanguageConfig() {
   return useQuery({
     queryKey: ['language-config'],
     queryFn: async () => {
-      const raw = await fetchJson('/language.json', null);
+      const raw = await fetchJson(siteUrl('language.json'), null);
       return normalizeLanguageConfig(raw);
     },
     staleTime: Infinity,
@@ -75,7 +76,6 @@ export function localeDisplayName(
   return config?.localeNames?.[key] || key;
 }
 
-/** Match legacy populateLocaleSelect: bundle languages ∩ enabledLocales (or all bundle langs). */
 export function visibleLocales(
   config: LanguageConfig | undefined,
   bundleLanguages: string[] | undefined,

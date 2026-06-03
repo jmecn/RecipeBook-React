@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { bundleBaseUrl, fetchJson } from '../../../shared/api/http';
+import { siteUrl } from '../../../shared/lib/site-base';
 
 interface BundlesManifest {
   default?: string;
@@ -13,7 +14,7 @@ export interface BundleMeta {
 export function useBundlesManifestQuery() {
   return useQuery({
     queryKey: ['bundles-manifest'],
-    queryFn: () => fetchJson<BundlesManifest>('/bundles.json', { default: undefined, bundles: [] }),
+    queryFn: () => fetchJson<BundlesManifest>(siteUrl('bundles.json'), { default: undefined, bundles: [] }),
   });
 }
 

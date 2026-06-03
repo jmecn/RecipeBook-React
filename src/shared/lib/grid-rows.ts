@@ -9,7 +9,6 @@ export function chunkIntoRows<T>(items: T[], columnCount: number): T[][] {
   return rows;
 }
 
-/** Match old site `.item-grid` breakpoints. */
 export function getItemGridColumnCount(viewportWidth: number) {
   const w = Math.max(0, viewportWidth);
   if (w <= 520) return 1;
@@ -20,7 +19,6 @@ export function getItemGridColumnCount(viewportWidth: number) {
   return 6;
 }
 
-/** Match flex-wrap column count from probed card width. */
 export function getRecipeGridColumnCountFromLayout(
   containerWidth: number,
   fallbackWidth: number,
@@ -39,7 +37,6 @@ export function getRecipeGridColumnCountFromLayout(
   return 3;
 }
 
-/** @deprecated Use getRecipeGridColumnCountFromLayout with probed card width. */
 export function getRecipeGridColumnCount(containerWidth: number, fallbackWidth = 0) {
   return getRecipeGridColumnCountFromLayout(containerWidth, fallbackWidth, RECIPE_GRID_COL_WIDTH);
 }

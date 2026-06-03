@@ -1,6 +1,8 @@
+import { siteUrl } from '../lib/site-base';
+
 export function bundleBaseUrl(bundleId: string) {
   const slug = String(bundleId || '').trim().replace(/^\/+|\/+$/g, '');
-  return `/bundles/${slug}/`;
+  return siteUrl(`bundles/${slug}/`);
 }
 
 export async function fetchJson<T>(url: string, fallback: T): Promise<T> {

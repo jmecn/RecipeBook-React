@@ -11,9 +11,7 @@ interface VirtualGridProps<T> {
   overscan?: number;
   gap?: number;
   rowClassName?: string;
-  /** `flex` for recipe cards (max-content width); `grid` for equal-width cells (items). */
   rowLayout?: 'grid' | 'flex';
-  /** Called when the visible row window changes (e.g. to remount lazy EMI cards). */
   onRangeChange?: () => void;
   renderCell: (item: T, index: number) => ReactNode;
 }

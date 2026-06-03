@@ -6,7 +6,6 @@ interface FormattedItemLabelProps {
   className?: string;
 }
 
-/** Renders EMI/Minecraft formatted item labels like the old site. */
 export function FormattedItemLabel({ label, className }: FormattedItemLabelProps) {
   const ref = useRef<HTMLDivElement | null>(null);
 

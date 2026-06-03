@@ -1,4 +1,3 @@
-/** Copy small site manifests into dist/ (bundle payload stays outside dist). */
 import fs from 'node:fs'
 import path from 'node:path'
 

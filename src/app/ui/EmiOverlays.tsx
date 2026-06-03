@@ -1,7 +1,3 @@
-/**
- * Global EMI overlay hosts (must match TFG-Recipe-Viewer/site/index.html).
- * emi-recipe-renderer fills .tag-popover-header / -stage-wrap / -footer on tag slot click.
- */
 export function EmiOverlays() {
   return (
     <>

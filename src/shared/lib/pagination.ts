@@ -1,4 +1,3 @@
-/** Page number list with ellipsis — matches old site buildPageRange. */
 export function buildPageRange(current: number, total: number, radius = 2): Array<number | '…'> {
   if (total <= 1) return [1];
   const pages = new Set([1, total]);

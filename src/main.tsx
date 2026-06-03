@@ -8,8 +8,10 @@ import 'emi-recipe-renderer/style.css'
 import './styles/emi-theme.css'
 import { AppBootGate } from './app/ui/AppBootGate'
 import { initThemeFromStorage } from './shared/lib/theme'
+import { normalizeSitePath } from './shared/lib/site-base'
 
 initThemeFromStorage()
+normalizeSitePath()
 document.body.classList.add('is-booting')
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

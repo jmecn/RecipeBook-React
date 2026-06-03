@@ -8,7 +8,6 @@
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  /* Page chrome is darker; cards/panels are lighter so dark item icons stay visible. */
   --tfg-bg: #151515;
   --tfg-surface: #292c31;
   --tfg-surface-2: #23262b;
@@ -33,7 +32,6 @@ html[data-theme="dark"] {
 
 html[data-theme="light"] {
   color-scheme: light;
-  /* Warm white page; cards slightly deeper (warm gray-beige), not cold blue-gray. */
   --tfg-bg: #faf8f4;
   --tfg-surface: #f0ebe4;
   --tfg-surface-2: #ffffff;
@@ -56,7 +54,6 @@ html[data-theme="light"] {
   --accent: var(--tfg-primary);
 }
 
-/* Fallback before theme script runs */
 html:not([data-theme]) {
   color-scheme: dark;
   --tfg-bg: #151515;

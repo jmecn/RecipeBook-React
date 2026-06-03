@@ -1,7 +1,6 @@
 export const FALLBACK_LOCALE = 'en_us';
 export const LOCALE_STORAGE_KEY = 'recipeViewerLocale';
 
-/** Shell UI strings are only defined for English and Chinese. */
 export type UiLang = 'en_us' | 'zh_cn';
 
 export interface UiMessages {

@@ -30,7 +30,6 @@ export function parseLocationQuery(search: string): AppRoute {
 
 export type AppRoutePatch = Partial<AppRoute>;
 
-/** Apply legacy recipe-viewer.js navigate() search clearing rules. */
 export function mergeAppRoute(current: AppRoute, patch: AppRoutePatch): AppRoute {
   const view = patch.view ?? current.view;
   const route: AppRoute = {
