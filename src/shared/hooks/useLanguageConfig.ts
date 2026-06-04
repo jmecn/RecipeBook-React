@@ -50,8 +50,8 @@ const FALLBACK_CONFIG: LanguageConfig = {
   defaultLocale: 'en_us',
   enabledLocales: ['en_us', 'zh_cn'],
   localeNames: {
-    en_us: 'English (US)',
-    zh_cn: '简体中文',
+    en_us: 'English',
+    zh_cn: '简体中文(中国大陆)',
   },
   uiText: {},
 };
@@ -76,6 +76,12 @@ export function localeDisplayName(
   return config?.localeNames?.[key] || key;
 }
 
+function localeOrderInList(code: string, order: string[]): number {
+  const key = normalizeLocale(code);
+  const index = order.findIndex((entry) => normalizeLocale(entry) === key);
+  return index >= 0 ? index : order.length;
+}
+
 export function visibleLocales(
   config: LanguageConfig | undefined,
   bundleLanguages: string[] | undefined,
@@ -85,5 +91,9 @@ export function visibleLocales(
   const langs = enabled.length > 0
     ? fromBundle.filter((code) => enabled.includes(normalizeLocale(code)))
     : fromBundle;
-  return langs.length > 0 ? langs : [config?.defaultLocale || FALLBACK_LOCALE];
+  const resolved = langs.length > 0 ? langs : [config?.defaultLocale || FALLBACK_LOCALE];
+  const order = enabled.length > 0 ? enabled : resolved;
+  return [...resolved].sort(
+    (a, b) => localeOrderInList(a, order) - localeOrderInList(b, order),
+  );
 }
