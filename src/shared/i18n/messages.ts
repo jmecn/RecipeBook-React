@@ -43,8 +43,8 @@ export interface UiMessages {
 
 export const UI_TEXT: Record<UiLang, UiMessages> = {
   en_us: {
-    appTitle: 'Recipe Viewer',
-    brandTitle: 'Recipe Viewer home',
+    appTitle: 'Recipe Book',
+    brandTitle: 'Recipe Book home',
     labelLang: 'lang:',
     labelBundle: 'bundle:',
     labelTheme: 'Theme',
@@ -80,8 +80,8 @@ export const UI_TEXT: Record<UiLang, UiMessages> = {
     copiedRecipeIdAria: 'Copied',
   },
   zh_cn: {
-    appTitle: '配方浏览器',
-    brandTitle: '配方浏览器首页',
+    appTitle: '配方书',
+    brandTitle: '配方书首页',
     labelLang: '语言：',
     labelBundle: '包：',
     labelTheme: '主题',

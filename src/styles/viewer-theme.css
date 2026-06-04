@@ -24,6 +24,9 @@ html[data-theme="dark"] {
   --tfg-boot-progress-border: rgba(255, 255, 255, 0.08);
   --bg: var(--tfg-bg);
   --panel: var(--tfg-surface);
+  --header-bg: var(--tfg-surface);
+  --header-control-bg: var(--tfg-bg);
+  --header-control-border: var(--tfg-border);
   --border: var(--tfg-border);
   --text: var(--tfg-text);
   --muted: var(--tfg-muted);
@@ -48,6 +51,9 @@ html[data-theme="light"] {
   --tfg-boot-progress-border: #d8d0c4;
   --bg: var(--tfg-bg);
   --panel: var(--tfg-surface);
+  --header-bg: var(--tfg-surface);
+  --header-control-bg: var(--tfg-surface-2);
+  --header-control-border: var(--tfg-border);
   --border: var(--tfg-border);
   --text: var(--tfg-text);
   --muted: var(--tfg-muted);
@@ -72,6 +78,9 @@ html:not([data-theme]) {
   --tfg-boot-progress-border: rgba(255, 255, 255, 0.08);
   --bg: var(--tfg-bg);
   --panel: var(--tfg-surface);
+  --header-bg: var(--tfg-surface);
+  --header-control-bg: var(--tfg-bg);
+  --header-control-border: var(--tfg-border);
   --border: var(--tfg-border);
   --text: var(--tfg-text);
   --muted: var(--tfg-muted);

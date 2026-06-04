@@ -3,7 +3,7 @@
   top: 0;
   z-index: 50;
   flex-shrink: 0;
-  background: var(--bg);
+  background: var(--header-bg, var(--bg));
   border-bottom: 1px solid var(--border);
 }
 
@@ -22,6 +22,7 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
+  gap: 8px;
   text-decoration: none;
   color: var(--text);
   border: none;
@@ -29,6 +30,22 @@
   cursor: pointer;
   padding: 0;
   font: inherit;
+}
+
+.site-brand-icon {
+  flex: 0 0 auto;
+  display: block;
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+
+.site-header .site-search-field,
+.site-header .header-control,
+.site-header .header-icon-button {
+  background: var(--header-control-bg, var(--panel));
+  border-color: var(--header-control-border, var(--border));
 }
 
 .site-brand:hover .site-name {

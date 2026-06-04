@@ -4,6 +4,7 @@ import { useLocaleSwitch } from '../context/LocaleSwitchContext';
 import { useI18n } from '../../shared/i18n/useI18n';
 import { buildAppUrl, buildNavUrl, parseLocationQuery, type AppView } from '../../shared/lib/location-query';
 import { normalizeLocale } from '../../shared/i18n/messages';
+import { siteUrl } from '../../shared/lib/site-base';
 import { useBundleMetaQuery, useBundlesManifestQuery } from '../../features/bundle/model/queries';
 import { resolveBundleId } from '../../shared/lib/bundle';
 import { useTheme } from '../../shared/hooks/useTheme';
@@ -106,6 +107,14 @@ export function SiteHeader() {
     <header className="site-header">
       <div className={`site-header-inner${showSearch ? '' : ' site-header-inner--no-search'}`}>
         <button type="button" className="site-brand" onClick={goHome} title={text.brandTitle}>
+          <img
+            className="site-brand-icon"
+            src={siteUrl('favicon-32.png')}
+            width={28}
+            height={28}
+            alt=""
+            decoding="async"
+          />
           <span className="site-name">{text.appTitle}</span>
         </button>
 

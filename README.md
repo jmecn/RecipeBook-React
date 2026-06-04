@@ -1,6 +1,6 @@
-# TFG Recipe Viewer
+# TFG Recipe Book
 
-EMI recipe bundle viewer (React + [emi-recipe-renderer](https://www.npmjs.com/package/emi-recipe-renderer)). Query-string routing: `?item=`, `?tag=`, `?recipe=`, `?lang=`, `?bundle=`.
+EMI recipe bundle viewer (React + [emi-recipe-renderer](https://www.npmjs.com/package/emi-recipe-renderer)). Query-string routing: `?item=`, `?tag=`, `?recipe=`, `?lang=`.
 
 ## Prerequisites
 
