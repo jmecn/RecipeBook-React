@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import type { CategoryRecipeLayout } from '../lib/category-recipe-layout';
 import { FALLBACK_CATEGORY_LAYOUT } from '../lib/category-recipe-layout';
-import { clearRecipeGridDom, patchRecipeGridDom } from '../lib/recipe-grid-dom';
+import type { RecipeIdCopyLabels } from '../../../shared/ui/recipe-id-copy';
+import { clearRecipeGridDom, patchRecipeGridDom, type RecipeCardOptions } from '../lib/recipe-grid-dom';
 import { getRecipeGridColumnCountFromLayout } from '../../../shared/lib/grid-rows';
 import {
   computeRecipeVirtualWindow,
@@ -16,9 +17,18 @@ interface RecipeGridPanelProps {
   panelKey: 'recipes' | 'uses';
   scrollRoot: HTMLElement | null;
   enabled: boolean;
+  onRecipeIdClick?: (recipeId: string) => void;
+  copyRecipeIdLabels?: RecipeIdCopyLabels;
 }
 
-export function RecipeGridPanel({ recipeIds, panelKey, scrollRoot, enabled }: RecipeGridPanelProps) {
+export function RecipeGridPanel({
+  recipeIds,
+  panelKey,
+  scrollRoot,
+  enabled,
+  onRecipeIdClick,
+  copyRecipeIdLabels,
+}: RecipeGridPanelProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const topSpacerRef = useRef<HTMLDivElement | null>(null);
   const bottomSpacerRef = useRef<HTMLDivElement | null>(null);
@@ -31,6 +41,14 @@ export function RecipeGridPanel({ recipeIds, panelKey, scrollRoot, enabled }: Re
   const [containerWidth, setContainerWidth] = useState(0);
   const [layoutReady, setLayoutReady] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const recipeCardOptions = useMemo<RecipeCardOptions | undefined>(() => {
+    if (!onRecipeIdClick && !copyRecipeIdLabels) return undefined;
+    return {
+      onIdClick: onRecipeIdClick,
+      copyLabels: copyRecipeIdLabels,
+    };
+  }, [copyRecipeIdLabels, onRecipeIdClick]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -93,6 +111,7 @@ export function RecipeGridPanel({ recipeIds, panelKey, scrollRoot, enabled }: Re
       windowIds: win.windowIds,
       cardPool: cardPoolRef.current,
       layout,
+      recipeCardOptions,
     });
 
     syncRecipeGridSpacers({
@@ -113,7 +132,7 @@ export function RecipeGridPanel({ recipeIds, panelKey, scrollRoot, enabled }: Re
     } else {
       setLoading(false);
     }
-  }, [client, containerWidth, enabled, mainWidth, panelKey, recipeIds, scrollRoot]);
+  }, [client, containerWidth, enabled, mainWidth, panelKey, recipeCardOptions, recipeIds, scrollRoot]);
 
   const recipeIdsKey = useMemo(() => recipeIds.join('\u0001'), [recipeIds]);
 

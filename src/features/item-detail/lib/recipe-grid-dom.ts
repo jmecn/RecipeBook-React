@@ -1,8 +1,49 @@
 import type { CategoryRecipeLayout } from './category-recipe-layout';
+import { createRecipeIdCopyButton, type RecipeIdCopyLabels } from '../../../shared/ui/recipe-id-copy';
+
+export interface RecipeCardOptions {
+  showId?: boolean;
+  onIdClick?: (recipeId: string) => void;
+  copyLabels?: RecipeIdCopyLabels;
+}
+
+function appendRecipeFooter(article: HTMLElement, recipeId: string, options?: RecipeCardOptions) {
+  if (options?.showId === false) return;
+
+  const footer = document.createElement('div');
+  footer.className = 'recipe-card-footer';
+
+  const onIdClick = options?.onIdClick;
+  let idEl: HTMLElement;
+  if (onIdClick) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'recipe-card-id recipe-card-id--link';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onIdClick(recipeId);
+    });
+    idEl = button;
+  } else {
+    idEl = document.createElement('p');
+    idEl.className = 'recipe-card-id';
+  }
+  idEl.title = recipeId;
+  idEl.textContent = recipeId;
+  footer.append(idEl);
+
+  if (options?.copyLabels) {
+    footer.append(createRecipeIdCopyButton(recipeId, options.copyLabels));
+  }
+
+  article.append(footer);
+}
 
 export function createRecipeCardElement(
   recipeId: string,
   layout: CategoryRecipeLayout | null,
+  options?: RecipeCardOptions,
 ): HTMLElement {
   const article = document.createElement('article');
   article.className = 'recipe-card';
@@ -13,12 +54,8 @@ export function createRecipeCardElement(
   stage.dataset.recipeId = recipeId;
   applyStageSkeletonSize(stage, layout);
 
-  const idEl = document.createElement('p');
-  idEl.className = 'recipe-card-id';
-  idEl.title = recipeId;
-  idEl.textContent = recipeId;
-
-  article.append(stage, idEl);
+  article.append(stage);
+  appendRecipeFooter(article, recipeId, options);
   return article;
 }
 
@@ -40,8 +77,9 @@ export function patchRecipeGridDom(options: {
   windowIds: string[];
   cardPool: Map<string, HTMLElement>;
   layout: CategoryRecipeLayout | null;
+  recipeCardOptions?: RecipeCardOptions;
 }): string[] {
-  const { container, topSpacer, bottomSpacer, windowIds, cardPool, layout } = options;
+  const { container, topSpacer, bottomSpacer, windowIds, cardPool, layout, recipeCardOptions } = options;
   const wantSet = new Set(windowIds);
 
   for (const [recipeId, card] of cardPool) {
@@ -54,7 +92,7 @@ export function patchRecipeGridDom(options: {
   for (const recipeId of windowIds) {
     let card = cardPool.get(recipeId);
     if (!card) {
-      card = createRecipeCardElement(recipeId, layout);
+      card = createRecipeCardElement(recipeId, layout, recipeCardOptions);
       cardPool.set(recipeId, card);
     } else {
       const stage = card.querySelector('.recipe-card-stage') as HTMLElement | null;

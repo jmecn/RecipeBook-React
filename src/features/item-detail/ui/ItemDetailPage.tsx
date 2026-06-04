@@ -184,6 +184,15 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
     [inputsGrouped, activeUsesCategory, keyword],
   );
 
+  const openRecipe = useCallback((recipeId: string) => {
+    navigate(buildNavUrl(route, { view: 'recipe', id: recipeId, lang: locale }));
+  }, [locale, navigate, route]);
+
+  const copyRecipeIdLabels = useMemo(
+    () => ({ copyAria: text.copyRecipeIdAria, copiedAria: text.copiedRecipeIdAria }),
+    [text.copyRecipeIdAria, text.copiedRecipeIdAria],
+  );
+
   const switchTab = useCallback((tab: DetailTab) => {
     if (scrollRoot) {
       detailScrollTop.current[activeTab] = scrollRoot.scrollTop;
@@ -244,6 +253,8 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
               panelKey="recipes"
               scrollRoot={scrollRoot}
               enabled={activeTab === 'recipes' && recipeIds.length > 0}
+              onRecipeIdClick={openRecipe}
+              copyRecipeIdLabels={copyRecipeIdLabels}
             />
           </section>
 
@@ -265,6 +276,8 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
               panelKey="uses"
               scrollRoot={scrollRoot}
               enabled={activeTab === 'uses' && useIds.length > 0}
+              onRecipeIdClick={openRecipe}
+              copyRecipeIdLabels={copyRecipeIdLabels}
             />
           </section>
 

@@ -100,28 +100,32 @@ export function SiteHeader() {
     }));
   };
 
+  const showSearch = route.view !== 'recipe';
+
   return (
     <header className="site-header">
-      <div className="site-header-inner">
+      <div className={`site-header-inner${showSearch ? '' : ' site-header-inner--no-search'}`}>
         <button type="button" className="site-brand" onClick={goHome} title={text.brandTitle}>
           <span className="site-name">{text.appTitle}</span>
         </button>
 
-        <div className="site-search">
-          <label className="site-search-field">
-            <span className="site-search-icon">
-              <SearchIcon />
-            </span>
-            <input
-              type="search"
-              className="site-search-input"
-              value={route.search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={filterPlaceholder(route.view, text.filterItems, text.filterDetail)}
-              autoComplete="off"
-            />
-          </label>
-        </div>
+        {showSearch && (
+          <div className="site-search">
+            <label className="site-search-field">
+              <span className="site-search-icon">
+                <SearchIcon />
+              </span>
+              <input
+                type="search"
+                className="site-search-input"
+                value={route.search}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder={filterPlaceholder(route.view, text.filterItems, text.filterDetail)}
+                autoComplete="off"
+              />
+            </label>
+          </div>
+        )}
 
         <div className="site-header-actions">
           <label className="header-control header-control--locale">

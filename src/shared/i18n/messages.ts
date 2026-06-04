@@ -37,6 +37,8 @@ export interface UiMessages {
   tagDataNotFound: string;
   recipeDataNotFound: string;
   switchingLanguage: string;
+  copyRecipeIdAria: string;
+  copiedRecipeIdAria: string;
 }
 
 export const UI_TEXT: Record<UiLang, UiMessages> = {
@@ -74,6 +76,8 @@ export const UI_TEXT: Record<UiLang, UiMessages> = {
     tagDataNotFound: 'Tag data not found.',
     recipeDataNotFound: 'Recipe data not found.',
     switchingLanguage: 'Switching language...',
+    copyRecipeIdAria: 'Copy recipe ID',
+    copiedRecipeIdAria: 'Copied',
   },
   zh_cn: {
     appTitle: '配方浏览器',
@@ -109,6 +113,8 @@ export const UI_TEXT: Record<UiLang, UiMessages> = {
     tagDataNotFound: '未找到标签数据。',
     recipeDataNotFound: '未找到配方数据。',
     switchingLanguage: '正在切换语言…',
+    copyRecipeIdAria: '复制配方 ID',
+    copiedRecipeIdAria: '已复制',
   },
 };
 
