@@ -1,8 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useRef } from 'react';
-import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
-import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
+import type { AppRoute } from '../../../shared/lib/location-query';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
+import { ItemCard } from '../../item-list/ui/ItemCard';
 
 export interface TagMemberRow {
   raw: string;
@@ -19,50 +17,24 @@ interface TagMemberCardProps {
 }
 
 export function TagMemberCard({ member, label, baseUrl, locale, route }: TagMemberCardProps) {
-  const navigate = useNavigate();
-  const iconRef = useRef<HTMLDivElement | null>(null);
-  const client = useMemo(() => getEmiRendererClient(), []);
-
-  useEffect(() => {
-    if (!member.isItem) return;
-    const host = iconRef.current;
-    if (!host) return;
-    const session = client.mountItemIcon(host, { itemId: member.id, baseUrl, locale });
-    return () => session.disconnect();
-  }, [baseUrl, client, locale, member.id, member.isItem]);
-
-  const body = (
-    <>
-      {member.isItem && <div className="item-card-icon" ref={iconRef} />}
-      <div className="item-card-text">
-        <FormattedItemLabel label={label} className="item-card-name" />
-        <div className="item-card-id">{member.raw}</div>
-      </div>
-    </>
-  );
-
-  if (!member.isItem) {
-    return <article className="item-card item-card--static">{body}</article>;
+  if (member.isItem) {
+    return (
+      <ItemCard
+        itemId={member.id}
+        label={label}
+        baseUrl={baseUrl}
+        locale={locale}
+        route={route}
+      />
+    );
   }
 
-  const openItem = () => {
-    navigate(buildNavUrl(route, { view: 'item', id: member.id, lang: locale }));
-  };
-
   return (
-    <article
-      className="item-card"
-      role="link"
-      tabIndex={0}
-      onClick={openItem}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openItem();
-        }
-      }}
-    >
-      {body}
+    <article className="item-card item-card--static">
+      <div className="item-card-text">
+        <FormattedItemLabel label={label} className="item-card-name" />
+        <span className="item-card-id">{member.raw}</span>
+      </div>
     </article>
   );
 }

@@ -11,11 +11,10 @@ import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { getActiveTheme } from '../../../shared/lib/theme';
 import { filterItemIds, lookupItemLabel } from '../../../shared/lib/item-labels';
 import { useViewerMain } from '../../../shared/hooks/useViewerMain';
+import { LIST_PAGE_SIZE } from '../../../shared/lib/pagination';
 import { ListPager } from '../../../shared/ui/ListPager';
 import { ItemCard } from './ItemCard';
 import '../../../styles/item-list.css';
-
-const ITEMS_PER_PAGE = 60;
 
 export function ItemListPage() {
   const { locale, t } = useI18n();
@@ -34,20 +33,20 @@ export function ItemListPage() {
     [itemsQuery.data],
   );
   const langQuery = useItemsLangQuery(bundleId, locale, items);
+  const labels = langQuery.data?.labels ?? {};
 
   const visibleItems = useMemo(() => {
-    return filterItemIds(items, keyword, langQuery.data?.searchRows ?? null);
-  }, [items, keyword, langQuery.data?.searchRows]);
+    return filterItemIds(items, keyword, langQuery.data?.searchRows ?? null, labels);
+  }, [items, keyword, langQuery.data?.searchRows, labels]);
 
-  const totalPages = Math.max(1, Math.ceil(visibleItems.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(1, Math.ceil(visibleItems.length / LIST_PAGE_SIZE));
   const safePage = Math.max(1, Math.min(page, totalPages));
   const pageItems = useMemo(() => {
-    const start = (safePage - 1) * ITEMS_PER_PAGE;
-    return visibleItems.slice(start, start + ITEMS_PER_PAGE);
+    const start = (safePage - 1) * LIST_PAGE_SIZE;
+    return visibleItems.slice(start, start + LIST_PAGE_SIZE);
   }, [safePage, visibleItems]);
 
   const baseUrl = bundleId ? bundleBaseUrl(bundleId) : '';
-  const labels = langQuery.data?.labels ?? {};
 
   const pagerSummary = useMemo(() => {
     const base = t('itemsCount', { count: visibleItems.length });

@@ -33,7 +33,7 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
   const { scrollElement } = useViewerMain();
   const copyRecipeIdLabels = useMemo(
-    () => ({ copyAria: t('copyRecipeIdAria'), copiedAria: t('copiedRecipeIdAria') }),
+    () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
     [t, i18n.language],
   );
 
@@ -81,9 +81,11 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
     <section className="item-detail-page recipe-detail-page">
       <header className="item-detail-header recipe-detail-header">
         <div className="item-detail-body recipe-detail-header-body">
-          <p className="item-detail-id">{recipeId}</p>
+          <div className="item-detail-id-row">
+            <p className="item-detail-id">{recipeId}</p>
+            <RecipeIdCopyButton recipeId={recipeId} labels={copyRecipeIdLabels} />
+          </div>
         </div>
-        <RecipeIdCopyButton recipeId={recipeId} labels={copyRecipeIdLabels} />
       </header>
 
       {!bundleId && <p className="app-empty">{t('noBundle')}</p>}

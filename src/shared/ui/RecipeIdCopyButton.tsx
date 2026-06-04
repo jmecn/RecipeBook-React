@@ -24,12 +24,24 @@ export function RecipeIdCopyButton({ recipeId, labels, className }: RecipeIdCopy
     });
   }, [recipeId]);
 
+  const onClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onCopy();
+    },
+    [onCopy],
+  );
+
+  const hint = copied ? labels.copiedAria : labels.copyAria;
+
   return (
     <button
       type="button"
       className={['recipe-card-copy', copied ? 'is-copied' : '', className].filter(Boolean).join(' ')}
-      aria-label={copied ? labels.copiedAria : labels.copyAria}
-      onClick={onCopy}
+      aria-label={hint}
+      title={hint}
+      onClick={onClick}
     >
       <span className="recipe-card-copy-icon" aria-hidden="true">
         {copied ? <CheckIcon /> : <CopyIcon />}

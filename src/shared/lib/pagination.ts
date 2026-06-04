@@ -1,3 +1,5 @@
+export const LIST_PAGE_SIZE = 60;
+
 export function buildPageRange(current: number, total: number, radius = 2): Array<number | '…'> {
   if (total <= 1) return [1];
   const pages = new Set([1, total]);

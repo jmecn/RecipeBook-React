@@ -33,11 +33,13 @@ export function buildItemSearchRows(
   const idToHay = new Map<string, string>();
   for (const row of data.items) {
     if (!row?.id || row.haystack == null) continue;
-    idToHay.set(row.id, String(row.haystack).toLowerCase());
+    const haystack = String(row.haystack).toLowerCase();
+    idToHay.set(canonicalItemId(row.id), haystack);
+    idToHay.set(row.id, haystack);
   }
   return itemIds.map((id) => ({
     id,
-    haystack: idToHay.get(id) ?? id.toLowerCase(),
+    haystack: idToHay.get(canonicalItemId(id)) ?? idToHay.get(id) ?? id.toLowerCase(),
   }));
 }
 
@@ -50,19 +52,35 @@ export function lookupItemLabel(
   return label != null && label !== '' ? label : bare;
 }
 
+function itemHaystack(
+  id: string,
+  hayById: Map<string, string>,
+  labels: Record<string, string> | null | undefined,
+): string {
+  const bare = canonicalItemId(id);
+  const fromIndex = hayById.get(bare) ?? hayById.get(id);
+  if (fromIndex) return fromIndex;
+  const label = labels?.[bare];
+  if (label) return `${bare.toLowerCase()} ${label.toLowerCase()}`;
+  return bare.toLowerCase();
+}
+
 export function filterItemIds(
   itemIds: string[],
   query: string,
   searchRows: ItemSearchRow[] | null,
+  labels?: Record<string, string> | null,
 ) {
   const q = normalizedFilterQuery(query);
   if (!q) return itemIds;
-  if (searchRows && searchRows.length === itemIds.length) {
-    const out: string[] = [];
-    for (let i = 0; i < searchRows.length; i += 1) {
-      if (searchRows[i].haystack.includes(q)) out.push(searchRows[i].id);
+
+  const hayById = new Map<string, string>();
+  if (searchRows?.length) {
+    for (const row of searchRows) {
+      hayById.set(canonicalItemId(row.id), row.haystack);
+      hayById.set(row.id, row.haystack);
     }
-    return out;
   }
-  return itemIds.filter((id) => id.toLowerCase().includes(q));
+
+  return itemIds.filter((id) => itemHaystack(id, hayById, labels).includes(q));
 }

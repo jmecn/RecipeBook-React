@@ -25,9 +25,11 @@ export function wireRecipeIdCopyButton(
   const showCopied = () => {
     window.clearTimeout(resetTimer);
     button.setAttribute('aria-label', labels.copiedAria);
+    button.title = labels.copiedAria;
     setCopyButtonIcon(button, true);
     resetTimer = window.setTimeout(() => {
       button.setAttribute('aria-label', labels.copyAria);
+      button.title = labels.copyAria;
       setCopyButtonIcon(button, false);
     }, RECIPE_ID_COPY_FEEDBACK_MS);
   };
@@ -49,6 +51,7 @@ export function createRecipeIdCopyButton(
   button.type = 'button';
   button.className = 'recipe-card-copy';
   button.setAttribute('aria-label', labels.copyAria);
+  button.title = labels.copyAria;
   button.innerHTML = `<span class="recipe-card-copy-icon" aria-hidden="true">${copyIconMarkup()}</span>`;
   wireRecipeIdCopyButton(button, recipeId, labels);
   return button;

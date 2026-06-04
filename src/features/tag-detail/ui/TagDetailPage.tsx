@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
-import { parseLocationQuery } from '../../../shared/lib/location-query';
+import { buildAppUrl, parseLocationQuery } from '../../../shared/lib/location-query';
+import { LIST_PAGE_SIZE } from '../../../shared/lib/pagination';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { tagMemberRows, useTagDetailQuery } from '../model/queries';
@@ -12,13 +13,12 @@ import { useViewerMain } from '../../../shared/hooks/useViewerMain';
 import { ListPager } from '../../../shared/ui/ListPager';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useItemsLangQuery } from '../../item-list/model/items-lang';
-import { lookupItemLabel } from '../../../shared/lib/item-labels';
+import { normalizedFilterQuery } from '../../../shared/lib/canonical-item-id';
+import { filterItemIds, lookupItemLabel } from '../../../shared/lib/item-labels';
 import { TagDetailHeader } from './TagDetailHeader';
 import { TagMemberCard } from './TagMemberCard';
 import '../../../styles/item-list.css';
 import '../../../styles/item-detail.css';
-
-const TAG_MEMBERS_PER_PAGE = 60;
 
 interface TagDetailPageProps {
   tagId: string;
@@ -27,13 +27,14 @@ interface TagDetailPageProps {
 export function TagDetailPage({ tagId }: TagDetailPageProps) {
   const { locale, t } = useI18n();
   const location = useLocation();
+  const navigate = useNavigate();
   const route = parseLocationQuery(location.search);
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const tagQuery = useTagDetailQuery(bundleId, tagId);
   const { scrollElement } = useViewerMain();
   const baseUrl = bundleId ? bundleBaseUrl(bundleId) : '';
-  const [page, setPage] = useState(1);
+  const page = route.page;
 
   const itemsQuery = useItemsCatalogQuery(bundleId);
   const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
@@ -45,12 +46,29 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
     return tagMemberRows(tagQuery.data.kind, tagQuery.data.members);
   }, [tagQuery.data]);
 
-  const totalPages = Math.max(1, Math.ceil(members.length / TAG_MEMBERS_PER_PAGE));
-  const safePage = Math.min(page, totalPages);
+  const keyword = route.search;
+
+  const visibleMembers = useMemo(() => {
+    const q = normalizedFilterQuery(keyword);
+    if (!q) return members;
+
+    const itemIds = members.filter((member) => member.isItem).map((member) => member.id);
+    const matchedItems = new Set(
+      filterItemIds(itemIds, keyword, langQuery.data?.searchRows ?? null, labels),
+    );
+
+    return members.filter((member) => {
+      if (member.isItem) return matchedItems.has(member.id);
+      return member.raw.toLowerCase().includes(q);
+    });
+  }, [members, keyword, langQuery.data?.searchRows, labels]);
+
+  const totalPages = Math.max(1, Math.ceil(visibleMembers.length / LIST_PAGE_SIZE));
+  const safePage = Math.max(1, Math.min(page, totalPages));
   const pageMembers = useMemo(() => {
-    const start = (safePage - 1) * TAG_MEMBERS_PER_PAGE;
-    return members.slice(start, start + TAG_MEMBERS_PER_PAGE);
-  }, [members, safePage]);
+    const start = (safePage - 1) * LIST_PAGE_SIZE;
+    return visibleMembers.slice(start, start + LIST_PAGE_SIZE);
+  }, [visibleMembers, safePage]);
 
   useEffect(() => {
     if (!baseUrl) return;
@@ -58,12 +76,14 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
   }, [baseUrl, locale]);
 
   useEffect(() => {
-    setPage(1);
-  }, [tagId]);
-
-  useEffect(() => {
     scrollElement?.scrollTo({ top: 0, behavior: 'auto' });
   }, [safePage, scrollElement, tagId]);
+
+  useEffect(() => {
+    if (page > totalPages && bundleId) {
+      navigate(buildAppUrl({ ...route, page: totalPages }), { replace: true });
+    }
+  }, [bundleId, navigate, page, route, totalPages]);
 
   const loading = Boolean(bundleId && tagQuery.isLoading);
 
@@ -97,14 +117,16 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
               />
             ))}
           </div>
-          {members.length === 0 && !loading && (
+          {visibleMembers.length === 0 && !loading && (
             <p className="app-empty">{t('emptyTagMembers')}</p>
           )}
           <ListPager
             current={safePage}
             total={totalPages}
-            summary={t('tagMembersSummary', { count: members.length })}
-            onPage={setPage}
+            summary={t('tagMembersSummary', { count: visibleMembers.length })}
+            onPage={(nextPage) => {
+              navigate(buildAppUrl({ ...route, page: nextPage }));
+            }}
           />
         </>
       )}

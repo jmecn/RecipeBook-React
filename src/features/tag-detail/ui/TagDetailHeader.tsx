@@ -4,6 +4,7 @@ import { EmiRecipeRenderer } from 'emi-recipe-renderer';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
 import { useI18n } from '../../../shared/i18n/useI18n';
+import { RecipeIdCopyButton } from '../../../shared/ui/RecipeIdCopyButton';
 
 interface TagDetailHeaderProps {
   tagId: string;
@@ -15,12 +16,17 @@ interface TagDetailHeaderProps {
 
 export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagDetailHeaderProps) {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, i18n } = useI18n();
+  const copyLabels = useMemo(
+    () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
+    [t, i18n.language],
+  );
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
   const [translatedLabel, setTranslatedLabel] = useState(tagId);
 
   useEffect(() => {
+    setTranslatedLabel(tagId);
     if (loading || !baseUrl) return;
     let cancelled = false;
     void client.translateTag(tagId, { baseUrl, locale }).then((label) => {
@@ -40,8 +46,6 @@ export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagD
     }
   }, [loading, translatedLabel]);
 
-  const hasTranslation = translatedLabel !== tagId;
-
   return (
     <header className="item-detail-header item-detail-header--tag">
       <button
@@ -54,7 +58,10 @@ export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagD
       </button>
       <div className="item-detail-body">
         <h1 ref={titleRef} className={`item-detail-title${loading ? ' is-loading' : ''}`} />
-        <p className="item-detail-id" hidden={!hasTranslation}>{tagId}</p>
+        <div className="item-detail-id-row">
+          <p className="item-detail-id">{tagId}</p>
+          {!loading && <RecipeIdCopyButton recipeId={tagId} labels={copyLabels} />}
+        </div>
       </div>
     </header>
   );

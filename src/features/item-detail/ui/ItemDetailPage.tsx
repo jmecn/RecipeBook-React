@@ -188,7 +188,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   }, [locale, navigate, route]);
 
   const copyRecipeIdLabels = useMemo(
-    () => ({ copyAria: t('copyRecipeIdAria'), copiedAria: t('copiedRecipeIdAria') }),
+    () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
     [t, i18n.language],
   );
 

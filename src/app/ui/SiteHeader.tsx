@@ -48,7 +48,7 @@ function MoonIcon() {
 }
 
 function filterPlaceholder(view: AppView, filterItems: string, filterDetail: string) {
-  return view === 'items' ? filterItems : filterDetail;
+  return view === 'items' || view === 'tag' ? filterItems : filterDetail;
 }
 
 export function SiteHeader() {
@@ -97,7 +97,7 @@ export function SiteHeader() {
     navigate(buildAppUrl({
       ...route,
       search: value,
-      page: route.view === 'items' ? 1 : route.page,
+      page: route.view === 'items' || route.view === 'tag' ? 1 : route.page,
     }));
   };
 

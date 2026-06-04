@@ -52,7 +52,6 @@ export function mergeAppRoute(current: AppRoute, patch: AppRoutePatch): AppRoute
   const viewChanging = patch.view !== undefined && patch.view !== current.view;
   const itemIdChanging =
     patch.id !== undefined && patch.id !== current.id && route.view === 'item';
-
   if (route.view === 'items' && current.view !== 'items') {
     route.search = '';
     if (patch.page === undefined) route.page = 1;
@@ -60,6 +59,12 @@ export function mergeAppRoute(current: AppRoute, patch: AppRoutePatch): AppRoute
 
   if (route.view === 'item' && route.id && (current.view !== 'item' || itemIdChanging)) {
     route.search = '';
+  }
+
+  const tagIdChanging =
+    patch.id !== undefined && patch.id !== current.id && route.view === 'tag';
+  if (route.view === 'tag' && route.id && (current.view !== 'tag' || tagIdChanging) && patch.page === undefined) {
+    route.page = 1;
   }
 
   if (viewChanging && route.view !== 'items' && route.view !== 'item') {
@@ -80,7 +85,9 @@ export function buildAppUrl(route: AppRoute) {
   const search = String(route.search || '').trim();
   if (search) params.set('search', search);
   const page = Number.isFinite(route.page) && route.page > 1 ? Math.floor(route.page) : 1;
-  if (route.view === 'items' && page > 1) params.set('page', String(page));
+  if ((route.view === 'items' || route.view === 'tag') && page > 1) {
+    params.set('page', String(page));
+  }
   if (route.view === 'item' && route.id) params.set('item', route.id);
   if (route.view === 'tag' && route.id) params.set('tag', route.id);
   if (route.view === 'recipe' && route.id) params.set('recipe', route.id);

@@ -9,6 +9,7 @@ import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useI18n } from '../../../shared/i18n/useI18n';
+import { RecipeIdCopyButton } from '../../../shared/ui/RecipeIdCopyButton';
 
 interface ItemDetailHeaderProps {
   itemId: string;
@@ -20,7 +21,11 @@ interface ItemDetailHeaderProps {
 
 export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: ItemDetailHeaderProps) {
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, i18n } = useI18n();
+  const copyItemIdLabels = useMemo(
+    () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
+    [t, i18n.language],
+  );
   const iconRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
@@ -61,7 +66,10 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
       {!loading && <div className="item-detail-icon" ref={iconRef} />}
       <div className="item-detail-body">
         <h1 ref={titleRef} className={`item-detail-title${loading ? ' is-loading' : ''}`} />
-        <p className="item-detail-id">{itemId}</p>
+        <div className="item-detail-id-row">
+          <p className="item-detail-id">{itemId}</p>
+          {!loading && <RecipeIdCopyButton recipeId={itemId} labels={copyItemIdLabels} />}
+        </div>
       </div>
     </header>
   );
