@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useLocaleSwitch } from '../context/LocaleSwitchContext';
 import { useI18n } from '../../shared/i18n/useI18n';
 import { buildAppUrl, buildNavUrl, parseLocationQuery, type AppView } from '../../shared/lib/location-query';
-import { normalizeLocale } from '../../shared/i18n/messages';
+import { normalizeLocale } from '../../shared/i18n/locale';
 import { siteUrl } from '../../shared/lib/site-base';
 import { useBundleMetaQuery, useBundlesManifestQuery } from '../../features/bundle/model/queries';
 import { resolveBundleId } from '../../shared/lib/bundle';
@@ -52,7 +52,7 @@ function filterPlaceholder(view: AppView, filterItems: string, filterDetail: str
 }
 
 export function SiteHeader() {
-  const { locale, text } = useI18n();
+  const { locale, t } = useI18n();
   const { setRouteLocale, switchLocale } = useLocaleSwitch();
   const location = useLocation();
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className={`site-header-inner${showSearch ? '' : ' site-header-inner--no-search'}`}>
-        <button type="button" className="site-brand" onClick={goHome} title={text.brandTitle}>
+        <button type="button" className="site-brand" onClick={goHome} title={t('brandTitle')}>
           <img
             className="site-brand-icon"
             src={siteUrl('favicon-32.png')}
@@ -115,7 +115,7 @@ export function SiteHeader() {
             alt=""
             decoding="async"
           />
-          <span className="site-name">{text.appTitle}</span>
+          <span className="site-name">{t('appTitle')}</span>
         </button>
 
         {showSearch && (
@@ -129,7 +129,7 @@ export function SiteHeader() {
                 className="site-search-input"
                 value={route.search}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder={filterPlaceholder(route.view, text.filterItems, text.filterDetail)}
+                placeholder={filterPlaceholder(route.view, t('filterItems'), t('filterDetail'))}
                 autoComplete="off"
               />
             </label>
@@ -138,7 +138,7 @@ export function SiteHeader() {
 
         <div className="site-header-actions">
           <label className="header-control header-control--locale">
-            <span className="header-control-label">{text.labelLang}</span>
+            <span className="header-control-label">{t('labelLang')}</span>
             <select
               className="header-select"
               aria-label="Language"
@@ -154,7 +154,7 @@ export function SiteHeader() {
           </label>
 
           <label className="header-control header-control--bundle" hidden={!showBundle}>
-            <span className="header-control-label">{text.labelBundle}</span>
+            <span className="header-control-label">{t('labelBundle')}</span>
             <select
               className="header-select"
               aria-label="Export bundle"
@@ -179,7 +179,7 @@ export function SiteHeader() {
           <button
             type="button"
             className="header-icon-button"
-            aria-label={text.labelTheme}
+            aria-label={t('labelTheme')}
             onClick={toggleTheme}
           >
             <span className="header-icon" data-theme-icon="light" hidden={theme !== 'light'}>

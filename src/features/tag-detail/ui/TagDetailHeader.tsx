@@ -15,7 +15,7 @@ interface TagDetailHeaderProps {
 
 export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagDetailHeaderProps) {
   const navigate = useNavigate();
-  const { text } = useI18n();
+  const { t } = useI18n();
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
   const [translatedLabel, setTranslatedLabel] = useState(tagId);
@@ -47,7 +47,7 @@ export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagD
       <button
         type="button"
         className="item-detail-back"
-        aria-label={text.backToItemsAria}
+        aria-label={t('backToItemsAria')}
         onClick={() => navigate(buildNavUrl(route, { view: 'items', id: null }))}
       >
         ←

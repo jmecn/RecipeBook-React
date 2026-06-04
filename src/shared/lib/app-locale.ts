@@ -1,4 +1,4 @@
-import { FALLBACK_LOCALE, LOCALE_STORAGE_KEY, normalizeLocale } from '../i18n/messages';
+import { FALLBACK_LOCALE, LOCALE_STORAGE_KEY, normalizeLocale } from '../i18n/locale';
 import { parseLocationQuery } from './location-query';
 
 export function resolveAppLocale(search = window.location.search): string {

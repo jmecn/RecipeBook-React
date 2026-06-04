@@ -7,8 +7,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && node scripts/copy-public-static.mjs",
+    "dev": "node scripts/sync-locale-manifest.mjs && vite",
+    "build": "node scripts/sync-locale-manifest.mjs && tsc && vite build && node scripts/copy-public-static.mjs",
     "lint": "eslint . --max-warnings 0",
     "preview": "vite preview"
   },
@@ -16,8 +16,10 @@
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-virtual": "^3.14.2",
     "emi-recipe-renderer": "^0.6.4",
+    "i18next": "^26.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^6.30.4",
     "zustand": "^5.0.14"
   },

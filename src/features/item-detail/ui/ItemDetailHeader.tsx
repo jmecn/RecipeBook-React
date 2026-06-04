@@ -20,7 +20,7 @@ interface ItemDetailHeaderProps {
 
 export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: ItemDetailHeaderProps) {
   const navigate = useNavigate();
-  const { text } = useI18n();
+  const { t } = useI18n();
   const iconRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
@@ -53,7 +53,7 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
       <button
         type="button"
         className="item-detail-back"
-        aria-label={text.backToItemsAria}
+        aria-label={t('backToItemsAria')}
         onClick={() => navigate(buildNavUrl(route, { view: 'items', id: null }))}
       >
         ←

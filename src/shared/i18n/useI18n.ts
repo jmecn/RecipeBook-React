@@ -1,19 +1,14 @@
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
-import {
-  FALLBACK_LOCALE,
-  LOCALE_STORAGE_KEY,
-  normalizeLocale,
-  resolveUiMessages,
-} from './messages';
 import { buildAppUrl, parseLocationQuery } from '../lib/location-query';
-import { useLanguageConfig } from '../hooks/useLanguageConfig';
+import { FALLBACK_LOCALE, LOCALE_STORAGE_KEY, normalizeLocale } from './locale';
 
-export function useI18n() {
+export function useAppLocale() {
   const location = useLocation();
   const navigate = useNavigate();
   const route = parseLocationQuery(location.search);
-  const langConfigQuery = useLanguageConfig();
+  const { i18n } = useTranslation();
 
   const locale = useMemo(() => {
     if (route.lang) return normalizeLocale(route.lang);
@@ -23,21 +18,24 @@ export function useI18n() {
 
   useEffect(() => {
     localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  }, [locale]);
+    if (normalizeLocale(i18n.language) !== locale) {
+      void i18n.changeLanguage(locale);
+    }
+  }, [i18n, locale]);
+
+  useEffect(() => {
+    document.title = i18n.t('appTitle');
+  }, [i18n, i18n.language]);
 
   const setLocale = (next: string) => {
-    const normalized = normalizeLocale(next);
-    navigate(buildAppUrl({ ...route, lang: normalized }));
+    navigate(buildAppUrl({ ...route, lang: normalizeLocale(next) }));
   };
 
-  const text = useMemo(
-    () => resolveUiMessages(locale, langConfigQuery.data?.uiText),
-    [locale, langConfigQuery.data?.uiText],
-  );
+  return { locale, setLocale, i18n };
+}
 
-  return {
-    locale,
-    text,
-    setLocale,
-  };
+export function useI18n() {
+  const { t } = useTranslation();
+  const { locale, setLocale, i18n } = useAppLocale();
+  return { locale, setLocale, t, i18n };
 }

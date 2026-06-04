@@ -1,17 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchJson } from '../api/http';
 import { siteUrl } from '../lib/site-base';
-import {
-  FALLBACK_LOCALE,
-  normalizeLocale,
-  type UiMessages,
-} from '../i18n/messages';
+import { FALLBACK_LOCALE, normalizeLocale } from '../i18n/locale';
 
 export interface LanguageConfig {
   defaultLocale: string;
   enabledLocales: string[];
   localeNames: Record<string, string>;
-  uiText: Partial<Record<string, Partial<UiMessages>>>;
 }
 
 function normalizeLanguageConfig(raw: unknown): LanguageConfig {
@@ -29,20 +24,10 @@ function normalizeLanguageConfig(raw: unknown): LanguageConfig {
     }
   }
 
-  const uiText: Partial<Record<string, Partial<UiMessages>>> = {};
-  if (cfg.uiText && typeof cfg.uiText === 'object') {
-    for (const [code, table] of Object.entries(cfg.uiText as Record<string, unknown>)) {
-      if (table && typeof table === 'object') {
-        uiText[normalizeLocale(code)] = table as Partial<UiMessages>;
-      }
-    }
-  }
-
   return {
     defaultLocale: normalizeLocale(String(cfg.defaultLocale || FALLBACK_LOCALE)),
     enabledLocales,
     localeNames,
-    uiText,
   };
 }
 
@@ -53,7 +38,6 @@ const FALLBACK_CONFIG: LanguageConfig = {
     en_us: 'English',
     zh_cn: '简体中文(中国大陆)',
   },
-  uiText: {},
 };
 
 export function useLanguageConfig() {

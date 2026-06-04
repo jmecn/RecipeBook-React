@@ -47,4 +47,6 @@ jobs:
           test -f dist/index.html
           test -f dist/bundles.json
           test -f dist/language.json
+          test -f dist/locales/manifest.json
+          test -f dist/locales/en_us.json
           ls -la dist/assets/

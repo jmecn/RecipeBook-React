@@ -20,7 +20,7 @@ interface RecipeDetailPageProps {
 }
 
 export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
-  const { locale, text } = useI18n();
+  const { locale, t, i18n } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const route = parseLocationQuery(location.search);
@@ -33,8 +33,8 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
   const gridRef = useRef<HTMLDivElement | null>(null);
   const { scrollElement } = useViewerMain();
   const copyRecipeIdLabels = useMemo(
-    () => ({ copyAria: text.copyRecipeIdAria, copiedAria: text.copiedRecipeIdAria }),
-    [text.copyRecipeIdAria, text.copiedRecipeIdAria],
+    () => ({ copyAria: t('copyRecipeIdAria'), copiedAria: t('copiedRecipeIdAria') }),
+    [t, i18n.language],
   );
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
         <RecipeIdCopyButton recipeId={recipeId} labels={copyRecipeIdLabels} />
       </header>
 
-      {!bundleId && <p className="app-empty">{text.noBundle}</p>}
+      {!bundleId && <p className="app-empty">{t('noBundle')}</p>}
       {bundleId && (
         <div ref={gridRef} className="recipe-grid recipe-grid-compact" />
       )}

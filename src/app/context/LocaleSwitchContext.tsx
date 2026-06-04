@@ -15,12 +15,9 @@ import { useBundlesManifestQuery } from '../../features/bundle/model/queries';
 import { bundleBaseUrl } from '../../shared/api/http';
 import { resolveBundleId } from '../../shared/lib/bundle';
 import { buildAppUrl, parseLocationQuery } from '../../shared/lib/location-query';
+import i18n from '../../shared/i18n/i18n';
 import { useI18n } from '../../shared/i18n/useI18n';
-import {
-  LOCALE_STORAGE_KEY,
-  normalizeLocale,
-  resolveUiMessages,
-} from '../../shared/i18n/messages';
+import { LOCALE_STORAGE_KEY, normalizeLocale } from '../../shared/i18n/locale';
 import { getActiveTheme } from '../../shared/lib/theme';
 import { AppLangTransition } from '../ui/AppLangTransition';
 
@@ -63,8 +60,7 @@ export function LocaleSwitchProvider({ children }: PropsWithChildren) {
       const normalized = normalizeLocale(next);
       if (normalized === locale) return;
 
-      const message = resolveUiMessages(normalized).switchingLanguage;
-      setStatus(message);
+      setStatus(i18n.t('switchingLanguage', { lng: normalized }));
       setVisible(true);
       document.body.classList.add('is-transitioning-lang');
 
@@ -73,6 +69,7 @@ export function LocaleSwitchProvider({ children }: PropsWithChildren) {
       try {
         hideEmiTagPopover(document.getElementById('tag-popover'));
         localStorage.setItem(LOCALE_STORAGE_KEY, normalized);
+        await i18n.changeLanguage(normalized);
         navigate(buildAppUrl({ ...route, lang: normalized }));
 
         if (bundleId) {

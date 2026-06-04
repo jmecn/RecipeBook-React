@@ -1,13 +1,12 @@
-import { resolveUiMessages } from '../../shared/i18n/messages';
+import i18n from '../../shared/i18n/i18n';
 
 interface AppBootOverlayProps {
-  locale: string;
   progress: number;
   status: string;
   hidden: boolean;
 }
 
-export function AppBootOverlay({ locale, progress, status, hidden }: AppBootOverlayProps) {
+export function AppBootOverlay({ progress, status, hidden }: AppBootOverlayProps) {
   if (hidden) return null;
 
   const pct = Math.round(Math.max(0, Math.min(1, progress)) * 100);
@@ -20,7 +19,7 @@ export function AppBootOverlay({ locale, progress, status, hidden }: AppBootOver
       aria-busy="true"
     >
       <div className="app-boot-card">
-        <p className="app-boot-title">{resolveUiMessages(locale).appTitle}</p>
+        <p className="app-boot-title">{i18n.t('appTitle')}</p>
         <div className="app-boot-progress" aria-hidden="true">
           <div className="app-boot-progress-fill" style={{ width: `${pct}%` }}>
             <span className="app-boot-progress-gleam" />

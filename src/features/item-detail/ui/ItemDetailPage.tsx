@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { hideEmiTagPopover } from 'emi-recipe-renderer';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { buildNavUrl, parseLocationQuery } from '../../../shared/lib/location-query';
-import { formatMessage } from '../../../shared/i18n/messages';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
@@ -39,7 +38,7 @@ interface TagEntry {
 }
 
 export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
-  const { locale, text } = useI18n();
+  const { locale, t, i18n } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const route = parseLocationQuery(location.search);
@@ -189,8 +188,8 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   }, [locale, navigate, route]);
 
   const copyRecipeIdLabels = useMemo(
-    () => ({ copyAria: text.copyRecipeIdAria, copiedAria: text.copiedRecipeIdAria }),
-    [text.copyRecipeIdAria, text.copiedRecipeIdAria],
+    () => ({ copyAria: t('copyRecipeIdAria'), copiedAria: t('copiedRecipeIdAria') }),
+    [t, i18n.language],
   );
 
   const switchTab = useCallback((tab: DetailTab) => {
@@ -209,10 +208,10 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
     <section className="item-detail-page">
       <ItemDetailHeader itemId={itemId} baseUrl={baseUrl} locale={locale} route={route} loading={loading} />
 
-      {!bundleId && <p className="app-empty">{text.noBundle}</p>}
-      {bundleId && detailQuery.isError && <p className="text-red-400">{text.loadFailed}</p>}
+      {!bundleId && <p className="app-empty">{t('noBundle')}</p>}
+      {bundleId && detailQuery.isError && <p className="text-red-400">{t('loadFailed')}</p>}
       {bundleId && !loading && !detailQuery.isError && !detailQuery.data && (
-        <p className="app-empty">{text.noDetail}</p>
+        <p className="app-empty">{t('noDetail')}</p>
       )}
 
       {bundleId && (loading || detailQuery.data) && (
@@ -220,17 +219,17 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
           <nav className="detail-tabs" aria-label="Item recipe tabs">
             <TabButton
               active={activeTab === 'recipes'}
-              label={`${text.tabsRecipes} (${recipeCount})`}
+              label={`${t('tabsRecipes')} (${recipeCount})`}
               onClick={() => switchTab('recipes')}
             />
             <TabButton
               active={activeTab === 'uses'}
-              label={`${text.tabsUses} (${usesCount})`}
+              label={`${t('tabsUses')} (${usesCount})`}
               onClick={() => switchTab('uses')}
             />
             <TabButton
               active={activeTab === 'tags'}
-              label={`${text.tabsTags} (${tagEntries.length})`}
+              label={`${t('tabsTags')} (${tagEntries.length})`}
               onClick={() => switchTab('tags')}
             />
           </nav>
@@ -246,7 +245,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
               keyword={keyword}
               onSelect={setRecipeCategory}
             />
-            {recipeCount === 0 && <p className="app-empty">{text.emptyRecipes}</p>}
+            {recipeCount === 0 && <p className="app-empty">{t('emptyRecipes')}</p>}
             <RecipeGridPanel
               key={`recipes:${activeRecipeCategory}:${keyword}`}
               recipeIds={recipeIds}
@@ -269,7 +268,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
               keyword={keyword}
               onSelect={setUsesCategory}
             />
-            {usesCount === 0 && <p className="app-empty">{text.emptyUses}</p>}
+            {usesCount === 0 && <p className="app-empty">{t('emptyUses')}</p>}
             <RecipeGridPanel
               key={`uses:${activeUsesCategory}:${keyword}`}
               recipeIds={useIds}
@@ -282,13 +281,13 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
           </section>
 
           <section className="detail-panel" hidden={activeTab !== 'tags'}>
-            {tagEntries.length === 0 && <p className="app-empty">{text.emptyTags}</p>}
+            {tagEntries.length === 0 && <p className="app-empty">{t('emptyTags')}</p>}
             {tagEntries.length > 0 && (
               <>
                 {visibleTagEntries.length > 0 && (
                   <div className="item-tags-list">
                     {visibleTagEntries.map((entry) => (
-                      <TagChip key={entry.id} entry={entry} route={route} locale={locale} text={text} />
+                      <TagChip key={entry.id} entry={entry} route={route} locale={locale} />
                     ))}
                   </div>
                 )}
@@ -298,7 +297,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
                     className="item-tags-more"
                     onClick={() => setShowAllTags(true)}
                   >
-                    {text.tagsShowAll}
+                    {t('tagsShowAll')}
                   </button>
                 )}
               </>
@@ -327,19 +326,18 @@ function TagChip({
   entry,
   route,
   locale,
-  text,
 }: {
   entry: TagEntry;
   route: ReturnType<typeof parseLocationQuery>;
   locale: string;
-  text: ReturnType<typeof useI18n>['text'];
 }) {
+  const { t } = useI18n();
   if (entry.clickable) {
     return (
       <Link
         to={buildNavUrl(route, { view: 'tag', id: entry.id, lang: locale })}
         className="item-tag-chip"
-        aria-label={formatMessage(text.openTagAria, { id: entry.id })}
+        aria-label={t('aria.openTag', { id: entry.id })}
       >
         {entry.id}
       </Link>
@@ -348,7 +346,7 @@ function TagChip({
   return (
     <span
       className="item-tag-chip is-disabled"
-      aria-label={formatMessage(text.tagNotInBundleAria, { id: entry.id })}
+      aria-label={t('aria.tagNotInBundle', { id: entry.id })}
     >
       {entry.id}
     </span>

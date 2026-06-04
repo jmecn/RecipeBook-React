@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { runAppBoot } from '../../shared/boot/run-app-boot';
 import { resolveAppLocale } from '../../shared/lib/app-locale';
-import { resolveUiMessages } from '../../shared/i18n/messages';
+import i18n from '../../shared/i18n/i18n';
 import { AppBootOverlay } from './AppBootOverlay';
 
 const BOOT_TOTAL_STEPS = 9;
@@ -15,7 +15,7 @@ export function AppBootGate({ children }: PropsWithChildren) {
   const stepsRef = useRef(0);
 
   useEffect(() => {
-    document.title = resolveUiMessages(bootLocale).appTitle;
+    document.title = i18n.t('appTitle');
   }, [bootLocale]);
 
   useEffect(() => {
@@ -51,7 +51,6 @@ export function AppBootGate({ children }: PropsWithChildren) {
   return (
     <>
       <AppBootOverlay
-        locale={bootLocale}
         progress={progress}
         status={status}
         hidden={!booting}

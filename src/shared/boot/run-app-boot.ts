@@ -1,6 +1,6 @@
 import { queryClient } from '../api/query-client';
 import { bundleBaseUrl, fetchJson } from '../api/http';
-import { bootText } from '../i18n/boot-messages';
+import i18n from '../i18n/i18n';
 import { resolveAppLocale } from '../lib/app-locale';
 import { parseLocationQuery } from '../lib/location-query';
 import { resolveBundleId } from '../lib/bundle';
@@ -21,7 +21,7 @@ export async function runAppBoot(onStatus: (message: string) => void) {
   const route = parseLocationQuery(window.location.search);
   const locale = resolveAppLocale();
 
-  onStatus(bootText(locale, 'bootReadingConfig'));
+  onStatus(i18n.t('boot.readingConfig'));
   await fetchJson(siteUrl('language.json'), null);
   const manifest = await fetchJson<BundlesManifest>(siteUrl('bundles.json'), {
     default: undefined,
@@ -33,7 +33,7 @@ export async function runAppBoot(onStatus: (message: string) => void) {
     await warmBundleById(bundleId, locale, onStatus);
   }
 
-  onStatus(bootText(locale, 'bootLoadingItemsIndex'));
+  onStatus(i18n.t('boot.loadingItemsIndex'));
   if (bundleId) {
     await queryClient.prefetchQuery({
       queryKey: ['bundles-manifest'],
@@ -54,7 +54,7 @@ export async function runAppBoot(onStatus: (message: string) => void) {
     });
   }
 
-  onStatus(bootText(locale, 'bootApplyingIconStyles'));
+  onStatus(i18n.t('boot.applyingIconStyles'));
   if (bundleId) {
     const langPayload = queryClient.getQueryData<Awaited<ReturnType<typeof loadItemsLangPayload>>>([
       'items-lang',

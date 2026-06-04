@@ -6,7 +6,6 @@ import { useItemsCatalogQuery } from '../model/queries';
 import { useItemsLangQuery } from '../model/items-lang';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
-import { formatMessage } from '../../../shared/i18n/messages';
 import { bundleBaseUrl } from '../../../shared/api/http';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { getActiveTheme } from '../../../shared/lib/theme';
@@ -19,7 +18,7 @@ import '../../../styles/item-list.css';
 const ITEMS_PER_PAGE = 60;
 
 export function ItemListPage() {
-  const { locale, text } = useI18n();
+  const { locale, t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
   const route = parseLocationQuery(location.search);
@@ -51,12 +50,12 @@ export function ItemListPage() {
   const labels = langQuery.data?.labels ?? {};
 
   const pagerSummary = useMemo(() => {
-    const base = formatMessage(text.itemsCount, { count: visibleItems.length });
+    const base = t('itemsCount', { count: visibleItems.length });
     const q = keyword.trim();
     if (!q) return base;
     if (langQuery.data?.hasLangIndex) return base;
-    return `${base} ${text.itemsLangMissing}`;
-  }, [visibleItems.length, keyword, langQuery.data?.hasLangIndex, text]);
+    return `${base} ${t('itemsLangMissing')}`;
+  }, [visibleItems.length, keyword, langQuery.data?.hasLangIndex, t]);
 
   useEffect(() => {
     if (!baseUrl) return;
@@ -80,15 +79,15 @@ export function ItemListPage() {
   }, [bundleId, navigate, page, route, totalPages]);
 
   if (itemsQuery.isLoading || langQuery.isLoading || !langQuery.data) {
-    return <section className="item-list-page app-empty">{text.loading}</section>;
+    return <section className="item-list-page app-empty">{t('loading')}</section>;
   }
 
   if (itemsQuery.isError) {
-    return <section className="item-list-page app-empty">{text.loadFailed}</section>;
+    return <section className="item-list-page app-empty">{t('loadFailed')}</section>;
   }
 
   if (!bundleId) {
-    return <section className="item-list-page app-empty">{text.noBundle}</section>;
+    return <section className="item-list-page app-empty">{t('noBundle')}</section>;
   }
 
   return (

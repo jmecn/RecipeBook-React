@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { parseLocationQuery } from '../../../shared/lib/location-query';
-import { formatMessage } from '../../../shared/i18n/messages';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { tagMemberRows, useTagDetailQuery } from '../model/queries';
@@ -26,7 +25,7 @@ interface TagDetailPageProps {
 }
 
 export function TagDetailPage({ tagId }: TagDetailPageProps) {
-  const { locale, text } = useI18n();
+  const { locale, t } = useI18n();
   const location = useLocation();
   const route = parseLocationQuery(location.search);
   const bundlesQuery = useBundlesManifestQuery();
@@ -78,10 +77,10 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
         loading={loading}
       />
 
-      {!bundleId && <p className="app-empty">{text.noBundle}</p>}
-      {bundleId && tagQuery.isError && <p className="text-red-400">{text.loadFailed}</p>}
+      {!bundleId && <p className="app-empty">{t('noBundle')}</p>}
+      {bundleId && tagQuery.isError && <p className="text-red-400">{t('loadFailed')}</p>}
       {bundleId && !loading && !tagQuery.isError && !tagQuery.data && (
-        <p className="app-empty">{text.tagDataNotFound}</p>
+        <p className="app-empty">{t('tagDataNotFound')}</p>
       )}
 
       {bundleId && (loading || tagQuery.data) && (
@@ -99,12 +98,12 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
             ))}
           </div>
           {members.length === 0 && !loading && (
-            <p className="app-empty">{text.emptyTagMembers}</p>
+            <p className="app-empty">{t('emptyTagMembers')}</p>
           )}
           <ListPager
             current={safePage}
             total={totalPages}
-            summary={formatMessage(text.tagMembersSummary, { count: members.length })}
+            summary={t('tagMembersSummary', { count: members.length })}
             onPage={setPage}
           />
         </>

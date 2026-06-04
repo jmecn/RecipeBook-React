@@ -1,7 +1,7 @@
 import { bundleBaseUrl, fetchJson } from '../api/http';
 import { warmFetch } from '../api/asset-cache';
-import { bootText } from '../i18n/boot-messages';
-import { FALLBACK_LOCALE } from '../i18n/messages';
+import i18n from '../i18n/i18n';
+import { FALLBACK_LOCALE } from '../i18n/locale';
 
 function joinBase(baseUrl: string, rel: string) {
   const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
@@ -15,19 +15,19 @@ export async function warmBundleAssets(
 ) {
   let usedCache = false;
 
-  onStatus?.(bootText(locale, 'bootLoadingBundle'));
+  onStatus?.(i18n.t('boot.loadingBundle'));
   if (await warmFetch(joinBase(baseUrl, 'bundle.json'))) usedCache = true;
 
   const activeLocale = locale || FALLBACK_LOCALE;
   const langCodes = new Set([FALLBACK_LOCALE]);
   if (activeLocale !== FALLBACK_LOCALE) langCodes.add(activeLocale);
 
-  onStatus?.(bootText(locale, 'bootLoadingLang'));
+  onStatus?.(i18n.t('boot.loadingLang'));
   for (const code of langCodes) {
     if (await warmFetch(joinBase(baseUrl, `lang/${code}.json`))) usedCache = true;
   }
 
-  onStatus?.(bootText(locale, 'bootLoadingIcons'));
+  onStatus?.(i18n.t('boot.loadingIcons'));
   type IconIndex = {
     pages?: Array<{
       preload?: boolean;
@@ -63,18 +63,20 @@ export async function warmBundleAssets(
   }
 
   if (preloadUrls.length > 0) {
-    onStatus?.(bootText(locale, 'bootWarmingAtlas'));
+    onStatus?.(i18n.t('boot.warmingAtlas'));
     const atlasWarm = await Promise.all(preloadUrls.map((url) => warmFetch(url)));
     if (atlasWarm.some(Boolean)) usedCache = true;
   }
 
-  onStatus?.(bootText(locale, 'bootLoadingSearch'));
+  onStatus?.(i18n.t('boot.loadingSearch'));
   if (await warmFetch(joinBase(baseUrl, `items-lang/${activeLocale}.json`))) usedCache = true;
   if (activeLocale !== FALLBACK_LOCALE) {
     if (await warmFetch(joinBase(baseUrl, `items-lang/${FALLBACK_LOCALE}.json`))) usedCache = true;
   }
 
-  onStatus?.(bootText(locale, 'bootEntering', { cachedHint: usedCache ? bootText(locale, 'cacheHint') : '' }));
+  onStatus?.(i18n.t('boot.entering', {
+    cachedHint: usedCache ? i18n.t('boot.cacheHint') : '',
+  }));
 }
 
 export async function warmBundleById(
