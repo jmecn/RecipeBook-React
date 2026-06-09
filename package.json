@@ -14,14 +14,12 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
-    "@tanstack/react-virtual": "^3.14.2",
     "emi-recipe-renderer": "^0.6.4",
     "i18next": "^26.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^17.0.8",
-    "react-router-dom": "^6.30.4",
-    "zustand": "^5.0.14"
+    "react-router-dom": "^6.30.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

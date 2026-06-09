@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLocaleSwitch } from '../context/LocaleSwitchContext';
 import { useI18n } from '../../shared/i18n/useI18n';
-import { buildAppUrl, buildNavUrl, parseLocationQuery, type AppView } from '../../shared/lib/location-query';
+import { buildAppUrl, buildNavUrl, type AppView } from '../../shared/lib/location-query';
+import { useAppRoute } from '../../shared/hooks/useAppRoute';
 import { normalizeLocale } from '../../shared/i18n/locale';
 import { siteUrl } from '../../shared/lib/site-base';
 import { useBundleMetaQuery, useBundlesManifestQuery } from '../../features/bundle/model/queries';
@@ -56,10 +57,9 @@ function filterPlaceholder(view: AppView, filterItems: string, filterDetail: str
 
 export function SiteHeader() {
   const { locale, t } = useI18n();
-  const { setRouteLocale, switchLocale } = useLocaleSwitch();
-  const location = useLocation();
+  const { switchLocale } = useLocaleSwitch();
   const navigate = useNavigate();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
   const bundlesQuery = useBundlesManifestQuery();
   const langConfigQuery = useLanguageConfig();
   const { theme, toggleTheme } = useTheme();
@@ -77,11 +77,11 @@ export function SiteHeader() {
 
     const urlLang = route.lang ? normalizeLocale(route.lang) : null;
     if (urlLang && locales.includes(urlLang) && urlLang !== locale) {
-      setRouteLocale(urlLang);
+      void switchLocale(urlLang);
       return;
     }
     if (!locales.includes(locale)) {
-      setRouteLocale(locales[0]);
+      void switchLocale(locales[0]);
     }
   }, [
     effectiveBundle,
@@ -89,7 +89,7 @@ export function SiteHeader() {
     locale,
     locales,
     route.lang,
-    setRouteLocale,
+    switchLocale,
   ]);
 
   const goHome = () => {

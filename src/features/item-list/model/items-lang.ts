@@ -28,10 +28,20 @@ export async function loadItemsLangPayload(
   };
 }
 
-export function useItemsLangQuery(bundleId: string, locale: string, itemIds: string[]) {
+export function itemsLangQueryKey(bundleId: string, locale: string, catalogSize: number) {
+  return ['items-lang', bundleId, locale, catalogSize] as const;
+}
+
+export function useItemsLangQuery(
+  bundleId: string,
+  locale: string,
+  itemIds: string[],
+  catalogReady = false,
+) {
+  const catalogSize = itemIds.length;
   return useQuery({
-    queryKey: ['items-lang', bundleId, locale],
-    enabled: Boolean(bundleId && locale),
+    queryKey: itemsLangQueryKey(bundleId, locale, catalogSize),
+    enabled: Boolean(bundleId && locale && catalogReady),
     queryFn: () => loadItemsLangPayload(bundleId, locale, itemIds),
   });
 }

@@ -7,14 +7,15 @@ import {
   type PropsWithChildren,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { hideEmiTagPopover } from 'emi-recipe-renderer';
 import { getEmiRendererClient } from '../../adapters/emi-renderer/client';
-import { loadItemsLangPayload } from '../../features/item-list/model/items-lang';
+import { itemsLangQueryKey, loadItemsLangPayload } from '../../features/item-list/model/items-lang';
 import { useBundlesManifestQuery } from '../../features/bundle/model/queries';
 import { bundleBaseUrl } from '../../shared/api/http';
 import { resolveBundleId } from '../../shared/lib/bundle';
-import { buildAppUrl, parseLocationQuery } from '../../shared/lib/location-query';
+import { buildAppUrl } from '../../shared/lib/location-query';
+import { useAppRoute } from '../../shared/hooks/useAppRoute';
 import i18n from '../../shared/i18n/i18n';
 import { useI18n } from '../../shared/i18n/useI18n';
 import { LOCALE_STORAGE_KEY, normalizeLocale } from '../../shared/i18n/locale';
@@ -28,7 +29,7 @@ function doubleAnimationFrame() {
 }
 
 interface LocaleSwitchContextValue {
-  setRouteLocale: (next: string) => void;
+  setRouteLocale: (next: string) => Promise<void>;
   switchLocale: (next: string) => Promise<void>;
 }
 
@@ -37,29 +38,19 @@ const LocaleSwitchContext = createContext<LocaleSwitchContextValue | null>(null)
 export function LocaleSwitchProvider({ children }: PropsWithChildren) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const location = useLocation();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
   const { locale } = useI18n();
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState('');
 
-  const setRouteLocale = useCallback(
-    (next: string) => {
-      const normalized = normalizeLocale(next);
-      if (normalized === locale) return;
-      localStorage.setItem(LOCALE_STORAGE_KEY, normalized);
-      navigate(buildAppUrl({ ...route, lang: normalized }));
-    },
-    [locale, navigate, route],
-  );
-
   const switchLocale = useCallback(
     async (next: string) => {
       const normalized = normalizeLocale(next);
       if (normalized === locale) return;
 
+      const previousLocale = locale;
       setStatus(i18n.t('switchingLanguage', { lng: normalized }));
       setVisible(true);
       document.body.classList.add('is-transitioning-lang');
@@ -75,7 +66,7 @@ export function LocaleSwitchProvider({ children }: PropsWithChildren) {
         if (bundleId) {
           const items = queryClient.getQueryData<string[]>(['items-catalog', bundleId]) ?? [];
           const langPayload = await queryClient.fetchQuery({
-            queryKey: ['items-lang', bundleId, normalized],
+            queryKey: itemsLangQueryKey(bundleId, normalized, items.length),
             queryFn: () => loadItemsLangPayload(bundleId, normalized, items),
           });
           const client = getEmiRendererClient();
@@ -87,6 +78,10 @@ export function LocaleSwitchProvider({ children }: PropsWithChildren) {
           });
           client.setRegistryLabels(langPayload.labels);
         }
+      } catch {
+        localStorage.setItem(LOCALE_STORAGE_KEY, previousLocale);
+        await i18n.changeLanguage(previousLocale);
+        navigate(buildAppUrl({ ...route, lang: previousLocale }));
       } finally {
         setVisible(false);
         document.body.classList.remove('is-transitioning-lang');
@@ -94,6 +89,8 @@ export function LocaleSwitchProvider({ children }: PropsWithChildren) {
     },
     [bundleId, locale, navigate, queryClient, route],
   );
+
+  const setRouteLocale = switchLocale;
 
   const value = useMemo(
     () => ({ setRouteLocale, switchLocale }),

@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
-import { buildAppUrl, parseLocationQuery } from '../../../shared/lib/location-query';
+import { buildAppUrl } from '../../../shared/lib/location-query';
+import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { LIST_PAGE_SIZE } from '../../../shared/lib/pagination';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
@@ -26,9 +27,8 @@ interface TagDetailPageProps {
 
 export function TagDetailPage({ tagId }: TagDetailPageProps) {
   const { locale, t } = useI18n();
-  const location = useLocation();
   const navigate = useNavigate();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const tagQuery = useTagDetailQuery(bundleId, tagId);
@@ -38,8 +38,8 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
 
   const itemsQuery = useItemsCatalogQuery(bundleId);
   const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
-  const langQuery = useItemsLangQuery(bundleId, locale, items);
-  const labels = langQuery.data?.labels ?? {};
+  const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
+  const labels = useMemo(() => langQuery.data?.labels ?? {}, [langQuery.data?.labels]);
 
   const members = useMemo(() => {
     if (!tagQuery.data) return [];

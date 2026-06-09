@@ -1,6 +1,6 @@
 {
-  "default": "tfg-0.12.8",
+  "default": "tfg-0.12.9",
   "bundles": [
-    "tfg-0.12.8"
+    "tfg-0.12.9"
   ]
 }

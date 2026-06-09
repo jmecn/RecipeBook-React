@@ -59,6 +59,15 @@ export function createRecipeCardElement(
   return article;
 }
 
+export function updateRecipeCardFooter(
+  article: HTMLElement,
+  recipeId: string,
+  options?: RecipeCardOptions,
+) {
+  article.querySelector('.recipe-card-footer')?.remove();
+  appendRecipeFooter(article, recipeId, options);
+}
+
 export function applyStageSkeletonSize(
   stage: HTMLElement,
   layout: CategoryRecipeLayout | null,
@@ -85,6 +94,7 @@ export function patchRecipeGridDom(options: {
   for (const [recipeId, card] of cardPool) {
     if (!wantSet.has(recipeId)) {
       card.remove();
+      cardPool.delete(recipeId);
     }
   }
 
@@ -97,6 +107,7 @@ export function patchRecipeGridDom(options: {
     } else {
       const stage = card.querySelector('.recipe-card-stage') as HTMLElement | null;
       if (stage) applyStageSkeletonSize(stage, layout);
+      updateRecipeCardFooter(card, recipeId, recipeCardOptions);
     }
 
     const next = anchor.nextElementSibling;

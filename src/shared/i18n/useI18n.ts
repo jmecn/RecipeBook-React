@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { buildAppUrl, parseLocationQuery } from '../lib/location-query';
+import { useNavigate } from 'react-router-dom';
+import { buildAppUrl } from '../lib/location-query';
+import { useAppRoute } from '../hooks/useAppRoute';
 import { FALLBACK_LOCALE, LOCALE_STORAGE_KEY, normalizeLocale } from './locale';
 
 export function useAppLocale() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
   const { i18n } = useTranslation();
 
   const locale = useMemo(() => {

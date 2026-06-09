@@ -1,4 +1,3 @@
-export const VIRTUAL_CARD_WIDTH = 340;
 export const VIRTUAL_ROW_HEIGHT = 260;
 export const RECIPE_META_MARGIN = 4;
 export const RECIPE_CARD_PADDING_Y = 36;

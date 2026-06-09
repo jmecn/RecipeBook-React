@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
+import { getEmiRendererClient, type IconMountSession } from '../../../adapters/emi-renderer/client';
 import type { CategoryRecipeLayout } from '../lib/category-recipe-layout';
 import { FALLBACK_CATEGORY_LAYOUT } from '../lib/category-recipe-layout';
 import type { RecipeIdCopyLabels } from '../../../shared/ui/recipe-id-copy';
@@ -34,7 +34,7 @@ export function RecipeGridPanel({
   const bottomSpacerRef = useRef<HTMLDivElement | null>(null);
   const cardPoolRef = useRef(new Map<string, HTMLElement>());
   const layoutRef = useRef<CategoryRecipeLayout>(FALLBACK_CATEGORY_LAYOUT);
-  const mountSessionRef = useRef<{ disconnect(): void } | null>(null);
+  const mountSessionRef = useRef<IconMountSession | null>(null);
 
   const client = useMemo(() => getEmiRendererClient(), []);
   const { width: mainWidth } = useViewerMain();
@@ -60,7 +60,14 @@ export function RecipeGridPanel({
   }, []);
 
   useEffect(() => {
-    if (!enabled || !recipeIds.length) {
+    if (!enabled) {
+      mountSessionRef.current?.disconnect();
+      mountSessionRef.current = null;
+      layoutRef.current = FALLBACK_CATEGORY_LAYOUT;
+      setLayoutReady(false);
+      return;
+    }
+    if (!recipeIds.length) {
       layoutRef.current = FALLBACK_CATEGORY_LAYOUT;
       setLayoutReady(false);
       return;
@@ -126,8 +133,11 @@ export function RecipeGridPanel({
 
     if (needsMountIds.length > 0) {
       setLoading(true);
-      mountSessionRef.current?.disconnect();
-      mountSessionRef.current = client.mountRecipeGrid(container, panelKey, scrollRoot);
+      if (!mountSessionRef.current) {
+        mountSessionRef.current = client.mountRecipeGrid(container, panelKey, scrollRoot);
+      } else {
+        void mountSessionRef.current.flush();
+      }
       window.setTimeout(() => setLoading(false), 0);
     } else {
       setLoading(false);

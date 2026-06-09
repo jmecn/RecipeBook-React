@@ -7,7 +7,7 @@ import { resolveBundleId } from '../lib/bundle';
 import { getEmiRendererClient } from '../../adapters/emi-renderer/client';
 import { getActiveTheme } from '../lib/theme';
 import { loadItemsCatalog } from '../../features/item-list/model/queries';
-import { loadItemsLangPayload } from '../../features/item-list/model/items-lang';
+import { itemsLangQueryKey, loadItemsLangPayload } from '../../features/item-list/model/items-lang';
 import { loadCategoriesManifest } from '../../features/item-detail/model/categories';
 import { siteUrl } from '../lib/site-base';
 import { warmBundleById } from './warm-bundle';
@@ -29,6 +29,8 @@ export async function runAppBoot(onStatus: (message: string) => void) {
   });
 
   const bundleId = resolveBundleId(route.bundleToken, manifest.default);
+  let catalogSize = 0;
+
   if (bundleId) {
     await warmBundleById(bundleId, locale, onStatus);
   }
@@ -43,24 +45,23 @@ export async function runAppBoot(onStatus: (message: string) => void) {
       queryKey: ['items-catalog', bundleId],
       queryFn: () => loadItemsCatalog(bundleId),
     });
+    catalogSize = items.length;
     await queryClient.prefetchQuery({
       queryKey: ['categories-manifest', bundleId],
       queryFn: () => loadCategoriesManifest(bundleId),
     });
 
     await queryClient.prefetchQuery({
-      queryKey: ['items-lang', bundleId, locale],
+      queryKey: itemsLangQueryKey(bundleId, locale, catalogSize),
       queryFn: () => loadItemsLangPayload(bundleId, locale, items),
     });
   }
 
   onStatus(i18n.t('boot.applyingIconStyles'));
   if (bundleId) {
-    const langPayload = queryClient.getQueryData<Awaited<ReturnType<typeof loadItemsLangPayload>>>([
-      'items-lang',
-      bundleId,
-      locale,
-    ]);
+    const langPayload = queryClient.getQueryData<Awaited<ReturnType<typeof loadItemsLangPayload>>>(
+      itemsLangQueryKey(bundleId, locale, catalogSize),
+    );
     await getEmiRendererClient().configure({
       baseUrl: bundleBaseUrl(bundleId),
       locale,

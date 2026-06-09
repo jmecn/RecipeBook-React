@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useI18n } from '../../../shared/i18n/useI18n';
-import { buildAppUrl, parseLocationQuery } from '../../../shared/lib/location-query';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { buildAppUrl } from '../../../shared/lib/location-query';
+import { useNavigate } from 'react-router-dom';
+import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useItemsCatalogQuery } from '../model/queries';
 import { useItemsLangQuery } from '../model/items-lang';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
@@ -18,9 +19,8 @@ import '../../../styles/item-list.css';
 
 export function ItemListPage() {
   const { locale, t } = useI18n();
-  const location = useLocation();
   const navigate = useNavigate();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const keyword = route.search;
@@ -32,8 +32,8 @@ export function ItemListPage() {
     () => (Array.isArray(itemsQuery.data) ? itemsQuery.data : []),
     [itemsQuery.data],
   );
-  const langQuery = useItemsLangQuery(bundleId, locale, items);
-  const labels = langQuery.data?.labels ?? {};
+  const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
+  const labels = useMemo(() => langQuery.data?.labels ?? {}, [langQuery.data?.labels]);
 
   const visibleItems = useMemo(() => {
     return filterItemIds(items, keyword, langQuery.data?.searchRows ?? null, labels);

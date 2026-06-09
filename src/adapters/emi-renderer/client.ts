@@ -130,6 +130,7 @@ class EmiRendererClientImpl implements EmiRendererClient {
   private renderer: EmiRecipeRenderer | null = null;
   private mountSessions = new Map<string, EmiLazyMountHandle | null>();
   private configurePromise: Promise<void> | null = null;
+  private configureGeneration = 0;
 
   private createRenderer() {
     this.renderer = new EmiRecipeRenderer(rendererOptionsFromClient(this));
@@ -163,6 +164,7 @@ class EmiRendererClientImpl implements EmiRendererClient {
   }
 
   async configure(options: ConfigureEmiRendererOptions) {
+    const generation = ++this.configureGeneration;
     const baseChanged = this.baseUrl !== options.baseUrl;
     this.baseUrl = options.baseUrl;
     this.locale = options.locale;
@@ -173,9 +175,10 @@ class EmiRendererClientImpl implements EmiRendererClient {
     this.onItemClick = options.onItemClick;
     this.onTagClick = options.onTagClick;
 
+    let promise: Promise<void>;
     if (!this.renderer || baseChanged) {
       this.createRenderer();
-      this.configurePromise = this.warmupRenderer().then(() => undefined);
+      promise = this.warmupRenderer().then(() => undefined);
     } else {
       const iconRenderer = this.renderer as EmiRendererWithIcons;
       iconRenderer.onItemClick = this.onItemClick;
@@ -184,9 +187,11 @@ class EmiRendererClientImpl implements EmiRendererClient {
         await iconRenderer.setLocale(this.locale);
       }
       this.setTheme(this.theme);
-      this.configurePromise = ensureIconResources(iconRenderer).then(() => undefined);
+      promise = ensureIconResources(iconRenderer).then(() => undefined);
     }
-    await this.configurePromise;
+    this.configurePromise = promise;
+    await promise;
+    if (generation !== this.configureGeneration) return;
     this.applyRegistryLabels();
     (this.renderer as EmiRendererWithIcons | null)?.ensureOverlayElements?.();
   }

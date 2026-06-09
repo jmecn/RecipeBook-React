@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { hideEmiTagPopover } from 'emi-recipe-renderer';
 import { useI18n } from '../../../shared/i18n/useI18n';
-import { buildNavUrl, parseLocationQuery } from '../../../shared/lib/location-query';
+import type { AppRoute } from '../../../shared/lib/location-query';
+import { buildNavUrl } from '../../../shared/lib/location-query';
+import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
@@ -39,16 +41,17 @@ interface TagEntry {
 
 export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const { locale, t, i18n } = useI18n();
-  const location = useLocation();
   const navigate = useNavigate();
-  const route = parseLocationQuery(location.search);
+  const route = useAppRoute();
+  const routeRef = useRef(route);
+  routeRef.current = route;
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const baseUrl = bundleId ? bundleBaseUrl(bundleId) : '';
   const detailQuery = useItemDetailQuery(bundleId, itemId);
   const itemsQuery = useItemsCatalogQuery(bundleId);
   const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
-  const langQuery = useItemsLangQuery(bundleId, locale, items);
+  const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
   const categoriesQuery = useCategoriesManifestQuery(bundleId);
   const client = useMemo(() => getEmiRendererClient(), []);
 
@@ -126,24 +129,28 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       registryLabels: langQuery.data?.labels,
       onItemClick: (clickedId) => {
         hideEmiTagPopover(document.getElementById('tag-popover'));
-        navigate(buildNavUrl(route, { view: 'item', id: clickedId, lang: locale }));
+        navigate(buildNavUrl(routeRef.current, { view: 'item', id: clickedId, lang: locale }));
       },
       onTagClick: (tag) => {
         hideEmiTagPopover(document.getElementById('tag-popover'));
         const tagId = typeof tag === 'string' ? tag : (tag as { id?: string })?.id;
-        if (tagId) navigate(buildNavUrl(route, { view: 'tag', id: tagId, lang: locale }));
+        if (tagId) navigate(buildNavUrl(routeRef.current, { view: 'tag', id: tagId, lang: locale }));
       },
     });
-  }, [baseUrl, client, langQuery.data?.labels, locale, navigate, route]);
+  }, [baseUrl, client, langQuery.data?.labels, locale, navigate]);
 
   useEffect(() => {
-    if (recipeCategories.length > 0 && !recipeCategories.includes(recipeCategory)) {
+    if (recipeCategories.length === 0) {
+      if (recipeCategory !== '') setRecipeCategory('');
+    } else if (!recipeCategories.includes(recipeCategory)) {
       setRecipeCategory(recipeCategories[0]);
     }
   }, [recipeCategories, recipeCategory]);
 
   useEffect(() => {
-    if (useCategories.length > 0 && !useCategories.includes(usesCategory)) {
+    if (useCategories.length === 0) {
+      if (usesCategory !== '') setUsesCategory('');
+    } else if (!useCategories.includes(usesCategory)) {
       setUsesCategory(useCategories[0]);
     }
   }, [useCategories, usesCategory]);
@@ -328,7 +335,7 @@ function TagChip({
   locale,
 }: {
   entry: TagEntry;
-  route: ReturnType<typeof parseLocationQuery>;
+  route: AppRoute;
   locale: string;
 }) {
   const { t } = useI18n();
