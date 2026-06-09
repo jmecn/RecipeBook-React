@@ -10,19 +10,16 @@
     <title>Recipe Book</title>
     <script>
       (function () {
+        var KEY = 'tfg-theme';
+        function norm(v) {
+          return v === 'light' || v === 'dark' || v === 'auto' ? v : null;
+        }
+        function resolve(pref) {
+          if (pref === 'light' || pref === 'dark') return pref;
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
         try {
-          var stored = localStorage.getItem('recipeViewerTheme');
-          var systemTheme = null;
-          if (window.matchMedia) {
-            var media = window.matchMedia('(prefers-color-scheme: dark)');
-            if (media && typeof media.matches === 'boolean') {
-              systemTheme = media.matches ? 'dark' : 'light';
-            }
-          }
-          var theme = (stored === 'light' || stored === 'dark')
-            ? stored
-            : (systemTheme || 'dark');
-          document.documentElement.dataset.theme = theme;
+          document.documentElement.dataset.theme = resolve(norm(localStorage.getItem(KEY)) || 'auto');
         } catch (e) {
           document.documentElement.dataset.theme = 'dark';
         }
