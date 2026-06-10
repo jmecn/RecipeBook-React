@@ -48,6 +48,14 @@ function MoonIcon() {
   );
 }
 
+function LocaleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m5 8 6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" />
+    </svg>
+  );
+}
+
 const WIKI_URL = 'https://wiki.terrafirmagreg.team/';
 const DISCORD_URL = 'https://discord.com/invite/AEaCzCTUwQ';
 
@@ -162,10 +170,13 @@ export function SiteHeader() {
           </nav>
 
           <label className="header-control header-control--locale">
+            <span className="header-locale-icon" aria-hidden="true">
+              <LocaleIcon />
+            </span>
             <span className="header-control-label">{t('labelLang')}</span>
             <select
-              className="header-select"
-              aria-label="Language"
+              className="header-select header-select--locale"
+              aria-label={t('labelLang')}
               value={locale}
               onChange={(e) => void switchLocale(e.target.value)}
             >
