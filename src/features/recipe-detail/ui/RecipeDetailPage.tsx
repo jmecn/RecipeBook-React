@@ -21,7 +21,7 @@ interface RecipeDetailPageProps {
 }
 
 export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
-  const { locale, t, i18n } = useI18n();
+  const { locale, t } = useI18n();
   const navigate = useNavigate();
   const route = useAppRoute();
   const routeRef = useRef(route);
@@ -36,7 +36,7 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
   const { scrollElement } = useViewerMain();
   const copyRecipeIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
-    [t, i18n.language],
+    [t],
   );
 
   useEffect(() => {

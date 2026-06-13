@@ -16,10 +16,10 @@ interface TagDetailHeaderProps {
 
 export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagDetailHeaderProps) {
   const navigate = useNavigate();
-  const { t, i18n } = useI18n();
+  const { t } = useI18n();
   const copyLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
-    [t, i18n.language],
+    [t],
   );
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);

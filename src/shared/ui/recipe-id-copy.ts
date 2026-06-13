@@ -1,5 +1,5 @@
 import { copyTextToClipboard } from '../lib/copy-to-clipboard';
-import { checkIconMarkup, copyIconMarkup } from './copy-icons';
+import { checkIconMarkup, copyIconMarkup } from './copy-icon-markup';
 
 export const RECIPE_ID_COPY_FEEDBACK_MS = 1200;
 

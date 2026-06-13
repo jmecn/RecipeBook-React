@@ -16,13 +16,13 @@ interface ItemCardProps {
 }
 
 export function ItemCard({ itemId, label, baseUrl, locale, route }: ItemCardProps) {
-  const { t, i18n } = useI18n();
+  const { t } = useI18n();
   const iconRef = useRef<HTMLSpanElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
   const displayLabel = label ?? lookupItemLabel(null, itemId);
   const copyItemIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
-    [t, i18n.language],
+    [t],
   );
 
   useEffect(() => {

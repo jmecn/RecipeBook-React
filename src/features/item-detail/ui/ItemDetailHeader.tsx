@@ -21,10 +21,10 @@ interface ItemDetailHeaderProps {
 
 export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: ItemDetailHeaderProps) {
   const navigate = useNavigate();
-  const { t, i18n } = useI18n();
+  const { t } = useI18n();
   const copyItemIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
-    [t, i18n.language],
+    [t],
   );
   const iconRef = useRef<HTMLDivElement | null>(null);
   const titleRef = useRef<HTMLHeadingElement | null>(null);

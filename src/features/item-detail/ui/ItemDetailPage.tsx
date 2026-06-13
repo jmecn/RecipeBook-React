@@ -40,7 +40,7 @@ interface TagEntry {
 }
 
 export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
-  const { locale, t, i18n } = useI18n();
+  const { locale, t } = useI18n();
   const navigate = useNavigate();
   const route = useAppRoute();
   const routeRef = useRef(route);
@@ -196,7 +196,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
 
   const copyRecipeIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
-    [t, i18n.language],
+    [t],
   );
 
   const switchTab = useCallback((tab: DetailTab) => {
