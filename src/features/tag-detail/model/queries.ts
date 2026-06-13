@@ -57,10 +57,14 @@ export function useTagDetailQuery(bundleId: string, tagId: string) {
   });
 }
 
+function isRenderableTagMember(kind: 'items' | 'blocks' | 'fluids', raw: string) {
+  return (kind === 'items' || kind === 'blocks' || kind === 'fluids') && !raw.startsWith('#');
+}
+
 export function tagMemberRows(kind: 'items' | 'blocks' | 'fluids', members: string[]) {
   return members.map((raw) => ({
     raw,
-    isItem: kind === 'items' && !raw.startsWith('#'),
+    isItem: isRenderableTagMember(kind, raw),
     id: raw.replace(/^#/, ''),
   }));
 }
