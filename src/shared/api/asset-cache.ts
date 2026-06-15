@@ -12,7 +12,6 @@ export async function fetchWithAssetCache(
       if (response.ok) await cache.put(url, response.clone());
       return { response, fromCache: false };
     } catch {
-      /* fall through */
     }
   }
   const response = await fetch(url);
@@ -26,7 +25,6 @@ export async function warmFetch(url: string): Promise<boolean> {
     try {
       await response.arrayBuffer();
     } catch {
-      /* ignore */
     }
     return fromCache;
   } catch {

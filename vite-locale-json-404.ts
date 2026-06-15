@@ -27,7 +27,6 @@ function localeJson404Middleware(
   }
 }
 
-/** Prevent SPA index.html fallback for missing UI locale files (dev + preview). */
 export function localeJson404Plugin(localesDir: string): Plugin {
   const attach = (server: { middlewares: Connect.Server }) => {
     server.middlewares.use(localeJson404Middleware(localesDir))

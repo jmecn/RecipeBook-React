@@ -7,7 +7,6 @@ import { FALLBACK_LOCALE, normalizeLocale } from './locale';
 
 let initPromise: Promise<void> | null = null;
 
-/** No regional guessing: missing locale file or key → default locale only. */
 function fallbackChainFor(code: string): string[] {
   const locale = normalizeLocale(code);
   return locale === FALLBACK_LOCALE ? [] : [FALLBACK_LOCALE];
@@ -41,7 +40,6 @@ const initOptions: InitOptions = {
   },
 };
 
-/** Loads current locale JSON (+ default locale when needed). Does not fetch every language file. */
 export function ensureI18nReady(): Promise<void> {
   if (initPromise) return initPromise;
   initPromise = i18n

@@ -1,5 +1,3 @@
-// Keep in sync with Wiki/ci/lib/tfg-theme.mjs
-
 export const THEME_STORAGE_KEY = 'tfg-theme';
 
 export type Theme = 'light' | 'dark';
@@ -48,7 +46,6 @@ export function setThemePreference(preference: ThemePreference) {
   writeStorageItem(THEME_STORAGE_KEY, preference);
 }
 
-/** @deprecated Use setThemePreference */
 export function setStoredTheme(theme: Theme) {
   setThemePreference(theme);
 }
