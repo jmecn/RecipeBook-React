@@ -26,6 +26,7 @@
   "emptyTags": "该物品没有标签。",
   "emptyUses": "没有配方将该物品作为输入。",
   "filterDetail": "按配方 ID 筛选…",
+  "creativeTabAll": "---",
   "filterItems": "按物品 ID 或名称筛选…",
   "itemDetailTitle": "物品详情",
   "itemsCount_other": "{{count}} 个物品",

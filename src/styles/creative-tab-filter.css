@@ -1,0 +1,215 @@
+.creative-tab-picker {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.creative-tab-picker-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(220px, 36vw);
+  padding: 4px 8px 4px 6px;
+  border: 1px solid var(--header-control-border, var(--border));
+  border-radius: 8px;
+  background: var(--header-control-bg, var(--panel));
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.creative-tab-picker-trigger:hover,
+.creative-tab-picker-trigger.is-open,
+.site-header .creative-tab-picker-trigger:focus-visible {
+  border-color: var(--accent);
+}
+
+.creative-tab-picker-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.creative-tab-picker-trigger-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.creative-tab-picker-chevron {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.creative-tab-picker-icon-slot {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.creative-tab-picker-icon-slot--24 {
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
+}
+
+.creative-tab-picker-icon-slot--32 {
+  width: 32px;
+  height: 32px;
+  flex-basis: 32px;
+}
+
+.creative-tab-picker-icon-slot--all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.creative-tab-picker-icon-slot .creative-tab-icon-atlas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.creative-tab-picker-icon-slot--24 .creative-tab-icon-atlas {
+  transform: scale(0.75);
+  transform-origin: top left;
+}
+
+.creative-tab-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.creative-tab-picker-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 81;
+  width: min(92vw, 420px);
+  max-height: min(72vh, 520px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: var(--tfg-shadow, 0 16px 40px rgba(0, 0, 0, 0.35));
+  overflow: hidden;
+}
+
+body.creative-tab-picker-open {
+  overflow: hidden;
+}
+
+.creative-tab-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.creative-tab-picker-close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--header-control-bg, var(--bg, var(--panel)));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.creative-tab-picker-close:hover,
+.creative-tab-picker-close:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+
+.creative-tab-picker-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg, var(--panel));
+  color: var(--text);
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.creative-tab-picker-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.creative-tab-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.creative-tab-picker-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.creative-tab-picker-option:hover {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.creative-tab-picker-option.is-selected {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.creative-tab-picker-option-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .creative-tab-picker-trigger {
+    max-width: none;
+    padding: 4px 8px;
+  }
+
+  .creative-tab-picker-trigger-label {
+    display: none;
+  }
+}

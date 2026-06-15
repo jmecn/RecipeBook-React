@@ -14,6 +14,7 @@ import {
   useLanguageConfig,
   visibleLocales,
 } from '../../shared/hooks/useLanguageConfig';
+import { CreativeTabFilter } from '../../features/item-list/ui/CreativeTabFilter';
 
 function SearchIcon() {
   return (
@@ -130,20 +131,25 @@ export function SiteHeader() {
         </button>
 
         {showSearch && (
-          <div className="site-search">
-            <label className="site-search-field">
-              <span className="site-search-icon">
-                <SearchIcon />
-              </span>
-              <input
-                type="search"
-                className="site-search-input"
-                value={route.search}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder={filterPlaceholder(route.view, t('filterItems'), t('filterDetail'))}
-                autoComplete="off"
-              />
-            </label>
+          <div className="site-search-row">
+            <div className="site-search">
+              <label className="site-search-field">
+                <span className="site-search-icon">
+                  <SearchIcon />
+                </span>
+                <input
+                  type="search"
+                  className="site-search-input"
+                  value={route.search}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder={filterPlaceholder(route.view, t('filterItems'), t('filterDetail'))}
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+            {route.view === 'items' && effectiveBundle ? (
+              <CreativeTabFilter bundleId={effectiveBundle} />
+            ) : null}
           </div>
         )}
 
@@ -169,7 +175,10 @@ export function SiteHeader() {
             </a>
           </nav>
 
-          <label className="header-control header-control--locale">
+          <label
+            className="header-control header-control--locale"
+            title={localeDisplayName(langConfigQuery.data, locale)}
+          >
             <span className="header-locale-icon" aria-hidden="true">
               <LocaleIcon />
             </span>
@@ -201,6 +210,7 @@ export function SiteHeader() {
                   view: 'items',
                   id: null,
                   page: 1,
+                  creativeTab: null,
                 }));
               }}
             >

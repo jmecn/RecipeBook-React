@@ -4,6 +4,7 @@ import { buildAppUrl } from '../../../shared/lib/location-query';
 import { useNavigate } from 'react-router-dom';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useItemsCatalogQuery } from '../model/queries';
+import { useCreativeTabMembersQuery } from '../model/creative-tabs';
 import { useItemsLangQuery } from '../model/items-lang';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
@@ -24,6 +25,7 @@ export function ItemListPage() {
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const keyword = route.search;
+  const creativeTab = route.creativeTab;
   const page = route.page;
   const { scrollElement } = useViewerMain();
 
@@ -33,11 +35,18 @@ export function ItemListPage() {
     [itemsQuery.data],
   );
   const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
+  const membersQuery = useCreativeTabMembersQuery(bundleId, creativeTab);
   const labels = useMemo(() => langQuery.data?.labels ?? {}, [langQuery.data?.labels]);
 
   const visibleItems = useMemo(() => {
-    return filterItemIds(items, keyword, langQuery.data?.searchRows ?? null, labels);
-  }, [items, keyword, langQuery.data?.searchRows, labels]);
+    let ids = items;
+    if (creativeTab) {
+      if (!membersQuery.isSuccess) return [];
+      const memberSet = new Set(membersQuery.data);
+      ids = ids.filter((id) => memberSet.has(id));
+    }
+    return filterItemIds(ids, keyword, langQuery.data?.searchRows ?? null, labels);
+  }, [items, creativeTab, membersQuery.data, membersQuery.isSuccess, keyword, langQuery.data?.searchRows, labels]);
 
   const totalPages = Math.max(1, Math.ceil(visibleItems.length / LIST_PAGE_SIZE));
   const safePage = Math.max(1, Math.min(page, totalPages));
@@ -77,7 +86,9 @@ export function ItemListPage() {
     }
   }, [bundleId, navigate, page, route, totalPages]);
 
-  if (itemsQuery.isLoading || langQuery.isLoading || !langQuery.data) {
+  const creativeTabLoading = Boolean(creativeTab && membersQuery.isLoading);
+
+  if (itemsQuery.isLoading || langQuery.isLoading || !langQuery.data || creativeTabLoading) {
     return <section className="item-list-page app-empty">{t('loading')}</section>;
   }
 

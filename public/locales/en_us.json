@@ -26,6 +26,7 @@
   "emptyTags": "No tags for this item.",
   "emptyUses": "No recipes use this item as input.",
   "filterDetail": "Filter recipe id...",
+  "creativeTabAll": "---",
   "filterItems": "Filter item id or name...",
   "itemDetailTitle": "Item Detail",
   "itemsCount_one": "{{count}} item",
