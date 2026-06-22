@@ -60,6 +60,14 @@
   white-space: nowrap;
 }
 
+.site-modpack-version {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--muted, color-mix(in srgb, var(--text) 62%, transparent));
+  white-space: nowrap;
+}
+
 .site-search-row {
   flex: 0 1 auto;
   display: flex;
@@ -281,6 +289,10 @@ html[data-theme="dark"] .header-select {
   }
 
   .site-name {
+    display: none;
+  }
+
+  .site-modpack-version {
     display: none;
   }
 

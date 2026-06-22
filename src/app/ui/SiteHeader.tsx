@@ -15,6 +15,8 @@ import {
   visibleLocales,
 } from '../../shared/hooks/useLanguageConfig';
 import { CreativeTabFilter } from '../../features/item-list/ui/CreativeTabFilter';
+import { useBuildInfo } from '../../shared/hooks/useBuildInfo';
+import { formatModpackVersion } from '../../shared/lib/build-info';
 
 function SearchIcon() {
   return (
@@ -78,6 +80,8 @@ export function SiteHeader() {
   const effectiveBundle = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const selectedBundle = effectiveBundle || '_';
   const bundleMetaQuery = useBundleMetaQuery(effectiveBundle);
+  const buildInfoQuery = useBuildInfo();
+  const modpackVersion = formatModpackVersion(buildInfoQuery.data?.modpack);
   const locales = visibleLocales(langConfigQuery.data, bundleMetaQuery.data?.languages);
 
   useEffect(() => {
@@ -128,6 +132,9 @@ export function SiteHeader() {
             decoding="async"
           />
           <span className="site-name">{t('appTitle')}</span>
+          {modpackVersion ? (
+            <span className="site-modpack-version">{modpackVersion}</span>
+          ) : null}
         </button>
 
         {showSearch && (
