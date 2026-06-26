@@ -339,6 +339,11 @@ html[data-theme="dark"] .header-select {
   min-height: 0;
 }
 
+.app-shell--embed {
+  display: block;
+  height: auto;
+}
+
 .app-main {
   flex: 1;
   min-height: 0;
@@ -346,6 +351,11 @@ html[data-theme="dark"] .header-select {
   padding: 12px 14px 24px;
   container-type: inline-size;
   container-name: viewer-main;
+}
+
+.app-shell--embed .app-main {
+  overflow: visible;
+  padding: 8px;
 }
 
 .list-pager {

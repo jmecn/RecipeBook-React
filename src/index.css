@@ -40,3 +40,18 @@ body.is-booting .app-main {
   flex-direction: column;
   min-height: 0;
 }
+
+html.is-embed {
+  overflow: auto;
+}
+
+html.is-embed,
+body.is-embed,
+body.is-embed #root {
+  height: auto;
+  min-height: 0;
+}
+
+body.is-embed {
+  overflow: hidden;
+}

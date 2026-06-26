@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { buildNavUrl } from '../../../shared/lib/location-query';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
+import { buildTopLevelRecipeBookHref, notifyEmbedNavigate, parseEmbedContext } from '../../../shared/lib/embed';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { bundleBaseUrl } from '../../../shared/api/http';
@@ -26,6 +27,7 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
   const route = useAppRoute();
   const routeRef = useRef(route);
   routeRef.current = route;
+  const embed = useMemo(() => parseEmbedContext(window.location.search), []);
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const client = useMemo(() => getEmiRendererClient(), []);
@@ -60,12 +62,25 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
         registryLabels: langQuery.data?.labels,
         onItemClick: (clickedId) => {
           hideEmiTagPopover(document.getElementById('tag-popover'));
-          navigate(buildNavUrl(routeRef.current, { view: 'item', id: clickedId, lang: locale }));
+          const href = buildNavUrl(routeRef.current, { view: 'item', id: clickedId, lang: locale });
+          if (embed.enabled) {
+            notifyEmbedNavigate(buildTopLevelRecipeBookHref(href), embed.frameId);
+            return;
+          }
+          navigate(href);
         },
         onTagClick: (tag) => {
           hideEmiTagPopover(document.getElementById('tag-popover'));
           const tagId = typeof tag === 'string' ? tag : (tag as { id?: string })?.id;
-          if (tagId) navigate(buildNavUrl(routeRef.current, { view: 'tag', id: tagId, lang: locale }));
+          if (!tagId) {
+            return;
+          }
+          const href = buildNavUrl(routeRef.current, { view: 'tag', id: tagId, lang: locale });
+          if (embed.enabled) {
+            notifyEmbedNavigate(buildTopLevelRecipeBookHref(href), embed.frameId);
+            return;
+          }
+          navigate(href);
         },
       })
       .then(() => {
@@ -77,7 +92,7 @@ export function RecipeDetailPage({ recipeId }: RecipeDetailPageProps) {
       cancelled = true;
       session?.disconnect();
     };
-  }, [bundleId, client, langQuery.data?.labels, locale, navigate, recipeId, scrollElement]);
+  }, [bundleId, client, embed.enabled, embed.frameId, langQuery.data?.labels, locale, navigate, recipeId, scrollElement]);
 
   return (
     <section className="item-detail-page recipe-detail-page">

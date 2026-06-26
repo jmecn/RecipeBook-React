@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { hideEmiTagPopover } from 'emi-recipe-renderer';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import type { AppRoute } from '../../../shared/lib/location-query';
 import { buildNavUrl } from '../../../shared/lib/location-query';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
+import { buildTopLevelRecipeBookHref, notifyEmbedNavigate, parseEmbedContext } from '../../../shared/lib/embed';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
 import { resolveBundleId } from '../../../shared/lib/bundle';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
@@ -45,6 +46,7 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const route = useAppRoute();
   const routeRef = useRef(route);
   routeRef.current = route;
+  const embed = useMemo(() => parseEmbedContext(window.location.search), []);
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
   const baseUrl = bundleId ? bundleBaseUrl(bundleId) : '';
@@ -120,6 +122,14 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   );
   const visibleTagEntries = showAllTags ? tagEntries : inBundleTagEntries;
 
+  const navigateWithinMode = useCallback((href: string) => {
+    if (embed.enabled) {
+      notifyEmbedNavigate(buildTopLevelRecipeBookHref(href), embed.frameId);
+      return;
+    }
+    navigate(href);
+  }, [embed.enabled, embed.frameId, navigate]);
+
   useEffect(() => {
     if (!baseUrl) return;
     void client.configure({
@@ -129,15 +139,20 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
       registryLabels: langQuery.data?.labels,
       onItemClick: (clickedId) => {
         hideEmiTagPopover(document.getElementById('tag-popover'));
-        navigate(buildNavUrl(routeRef.current, { view: 'item', id: clickedId, lang: locale }));
+        const href = buildNavUrl(routeRef.current, { view: 'item', id: clickedId, lang: locale });
+        navigateWithinMode(href);
       },
       onTagClick: (tag) => {
         hideEmiTagPopover(document.getElementById('tag-popover'));
         const tagId = typeof tag === 'string' ? tag : (tag as { id?: string })?.id;
-        if (tagId) navigate(buildNavUrl(routeRef.current, { view: 'tag', id: tagId, lang: locale }));
+        if (!tagId) {
+          return;
+        }
+        const href = buildNavUrl(routeRef.current, { view: 'tag', id: tagId, lang: locale });
+        navigateWithinMode(href);
       },
     });
-  }, [baseUrl, client, langQuery.data?.labels, locale, navigate]);
+  }, [baseUrl, client, langQuery.data?.labels, locale, navigateWithinMode]);
 
   useEffect(() => {
     if (recipeCategories.length === 0) {
@@ -191,8 +206,9 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   );
 
   const openRecipe = useCallback((recipeId: string) => {
-    navigate(buildNavUrl(route, { view: 'recipe', id: recipeId, lang: locale }));
-  }, [locale, navigate, route]);
+    const href = buildNavUrl(route, { view: 'recipe', id: recipeId, lang: locale });
+    navigateWithinMode(href);
+  }, [locale, navigateWithinMode, route]);
 
   const copyRecipeIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
@@ -294,7 +310,13 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
                 {visibleTagEntries.length > 0 && (
                   <div className="item-tags-list">
                     {visibleTagEntries.map((entry) => (
-                      <TagChip key={entry.id} entry={entry} route={route} locale={locale} />
+                      <TagChip
+                        key={entry.id}
+                        entry={entry}
+                        route={route}
+                        locale={locale}
+                        onNavigate={navigateWithinMode}
+                      />
                     ))}
                   </div>
                 )}
@@ -333,21 +355,25 @@ function TagChip({
   entry,
   route,
   locale,
+  onNavigate,
 }: {
   entry: TagEntry;
   route: AppRoute;
   locale: string;
+  onNavigate: (href: string) => void;
 }) {
   const { t } = useI18n();
+  const href = buildNavUrl(route, { view: 'tag', id: entry.id, lang: locale });
   if (entry.clickable) {
     return (
-      <Link
-        to={buildNavUrl(route, { view: 'tag', id: entry.id, lang: locale })}
+      <button
+        type="button"
+        onClick={() => onNavigate(href)}
         className="item-tag-chip"
         aria-label={t('aria.openTag', { id: entry.id })}
       >
         {entry.id}
-      </Link>
+      </button>
     );
   }
   return (
