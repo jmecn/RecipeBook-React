@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { EmiRecipeRenderer } from 'emi-recipe-renderer';
+import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../lib/minecraft-text';
 
 interface FormattedItemLabelProps {
   label: string;
@@ -12,10 +12,10 @@ export function FormattedItemLabel({ label, className }: FormattedItemLabelProps
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (typeof EmiRecipeRenderer.setFormattedText === 'function') {
-      EmiRecipeRenderer.setFormattedText(el, label);
+    if (hasMinecraftFormatting(label)) {
+      applyMinecraftFormattedClasses(el, label);
     } else {
-      el.textContent = label.replace(/§./g, '');
+      el.textContent = label;
     }
   }, [label]);
 

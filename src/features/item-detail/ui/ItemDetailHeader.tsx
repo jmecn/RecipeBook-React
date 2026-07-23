@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EmiRecipeRenderer } from 'emi-recipe-renderer';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
+import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
 import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
 import { useItemsLangQuery } from '../../item-list/model/items-lang';
 import { lookupItemLabel } from '../../../shared/lib/item-labels';
@@ -10,6 +10,7 @@ import { resolveBundleId } from '../../../shared/lib/bundle';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { RecipeIdCopyButton } from '../../../shared/ui/RecipeIdCopyButton';
+import { encodeCalcState } from '../../../shared/lib/calc-base64';
 
 interface ItemDetailHeaderProps {
   itemId: string;
@@ -38,10 +39,10 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
 
   useEffect(() => {
     if (loading || !titleRef.current) return;
-    if (typeof EmiRecipeRenderer.setFormattedText === 'function') {
-      EmiRecipeRenderer.setFormattedText(titleRef.current, title);
+    if (hasMinecraftFormatting(title)) {
+      applyMinecraftFormattedClasses(titleRef.current, title);
     } else {
-      titleRef.current.textContent = title.replace(/§./g, '');
+      titleRef.current.textContent = title;
     }
   }, [loading, title]);
 
@@ -52,6 +53,11 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
     const session = client.mountItemIcon(host, { itemId, baseUrl, locale });
     return () => session.disconnect();
   }, [baseUrl, client, itemId, loading, locale]);
+
+  const handleOpenCalculator = () => {
+    const calcState = { targets: [{ itemId, amount: 1 }], selections: {}, collapsed: {} };
+    navigate(buildNavUrl(route, { view: 'calculator', calc: encodeCalcState(calcState) }));
+  };
 
   return (
     <header className="item-detail-header">
@@ -71,6 +77,17 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
           {!loading && <RecipeIdCopyButton recipeId={itemId} labels={copyItemIdLabels} />}
         </div>
       </div>
+      {!loading && (
+        <button
+          type="button"
+          className="item-detail-back"
+          aria-label="Recipe Calculator"
+          onClick={handleOpenCalculator}
+          title="Recipe Calculator"
+        >
+          🧮
+        </button>
+      )}
     </header>
   );
 }

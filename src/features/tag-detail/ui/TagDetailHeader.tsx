@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { EmiRecipeRenderer } from 'emi-recipe-renderer';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
+import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
 import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { RecipeIdCopyButton } from '../../../shared/ui/RecipeIdCopyButton';
@@ -39,10 +39,10 @@ export function TagDetailHeader({ tagId, baseUrl, locale, route, loading }: TagD
 
   useEffect(() => {
     if (loading || !titleRef.current) return;
-    if (typeof EmiRecipeRenderer.setFormattedText === 'function') {
-      EmiRecipeRenderer.setFormattedText(titleRef.current, translatedLabel);
+    if (hasMinecraftFormatting(translatedLabel)) {
+      applyMinecraftFormattedClasses(titleRef.current, translatedLabel);
     } else {
-      titleRef.current.textContent = translatedLabel.replace(/§./g, '');
+      titleRef.current.textContent = translatedLabel;
     }
   }, [loading, translatedLabel]);
 

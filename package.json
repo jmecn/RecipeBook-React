@@ -1,7 +1,7 @@
 {
   "name": "tfg-recipe-viewer-react",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "engines": {
     "node": ">=24"
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.14",
-    "emi-recipe-renderer": "^0.6.4",
+    "emi-recipe-renderer": "^0.6.6",
     "i18next": "^26.3.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

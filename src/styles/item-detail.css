@@ -414,3 +414,984 @@
   border-radius: 4px;
   background: var(--panel);
 }
+
+/* ---- Recipe Calculator ---- */
+
+.calc-empty {
+  margin: 40px auto;
+  max-width: 420px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.calc-empty p {
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.calc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.calc-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 360px;
+}
+
+.calc-search-wrap .site-search-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.calc-search-wrap .site-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.calc-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.calc-toolbar-btn {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.calc-toolbar-btn:hover {
+  background: var(--panel);
+  border-color: var(--accent);
+}
+
+.calc-search-results {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 10;
+  margin-top: 4px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.calc-search-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.calc-search-item:hover,
+.calc-search-item:focus {
+  background: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  outline: none;
+}
+
+.calc-search-icon {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-search-icon .icon-atlas {
+  width: 24px;
+  height: 24px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-search-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tree */
+
+.calc-tree {
+  font-size: 0.88rem;
+}
+
+.calc-tree-node {
+  min-width: 0;
+}
+
+.calc-tree-children {
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.calc-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  min-width: 0;
+  transition: background 0.12s;
+}
+
+.calc-tree-row.is-root {
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 6px 8px;
+}
+
+.calc-tree-row.is-clickable {
+  cursor: pointer;
+}
+
+.calc-tree-row.is-clickable:hover {
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+}
+
+.calc-tree-row.is-byproduct {
+  opacity: 0.75;
+}
+
+.calc-tree-toggle {
+  flex: 0 0 16px;
+  width: 16px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  user-select: none;
+}
+
+.calc-tree-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.calc-tree-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-tree-label {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.calc-tree-label-inner {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calc-tree-amount {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.calc-tree-recipe {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.calc-tree-recipes-badge {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.calc-tree-clear-btn {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-tree-clear-btn:hover {
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 10%, transparent);
+}
+
+.calc-tree-select-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+
+.calc-tree-select-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.calc-tree-tag-id {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  padding: 0 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+
+.is-tag-input {
+  opacity: 0.85;
+}
+
+.is-tag-input:hover {
+  opacity: 1;
+  background: var(--bg);
+}
+
+/* Summary panel */
+
+.calc-summary {
+  position: sticky;
+  top: 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.calc-summary-heading {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.calc-summary-heading + .calc-summary-heading {
+  margin-top: 14px;
+}
+
+.calc-summary-empty {
+  margin: 4px 0 8px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.calc-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.calc-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  border-radius: 4px;
+  font-size: 0.84rem;
+}
+
+.calc-summary-item:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.calc-summary-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.calc-summary-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-summary-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.calc-summary-amount {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.calc-summary-item--catalyst {
+  opacity: 0.7;
+}
+
+.calc-summary-item--catalyst .calc-summary-name {
+  font-style: italic;
+}
+
+.calc-summary-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* Calculator page layout */
+
+.calc-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.calc-main-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.calc-trees-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 12px;
+}
+
+.calc-tree-column {
+  flex: 1 0 320px;
+  min-width: 320px;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.calc-tree-column-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.calc-tree-column-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
+.calc-tree-column-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-tree-column-icon .icon-atlas {
+  width: 28px;
+  height: 28px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-tree-column-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calc-tree-column-amount {
+  width: 56px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.calc-tree-column-amount:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.calc-tree-column-remove {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.calc-tree-column-remove:hover {
+  color: #ef4444;
+}
+
+.calc-summary-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+.calc-summary-overlay-close {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 310;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.calc-summary-overlay-close:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.calc-summary-overlay-content {
+  padding: 16px 24px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Material list in drawer */
+
+.calc-material-list {
+  padding: 8px 16px;
+}
+
+.calc-material-group {
+  margin-bottom: 16px;
+}
+
+.calc-material-group-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.calc-material-group-grid {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+@media (max-width: 1400px) {
+  .calc-material-group-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .calc-material-group-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 940px) {
+  .calc-material-group-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .calc-material-group-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .calc-material-group-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calc-material-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  position: relative;
+}
+
+.calc-material-card-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-material-card-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-material-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calc-material-card-name {
+  font-size: 0.78rem;
+  line-height: 1.2;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calc-material-card-amount {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.calc-material-stats {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* Selection Modals */
+
+.calc-select-modal {
+  max-width: 720px;
+  width: 90%;
+  height: 70vh;
+  min-height: 400px;
+}
+
+.recipe-select-title-sep {
+  display: inline-block;
+  width: 4px;
+}
+
+.recipe-select-title-item {
+  display: inline;
+  font-weight: 600;
+}
+
+.calc-recipe-body .recipe-grid-compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: start;
+  align-content: flex-start;
+  padding: 8px 0;
+}
+
+.calc-recipe-body .recipe-grid-compact .emi-recipe {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.calc-recipe-body .recipe-grid-compact .emi-recipe:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.calc-select-modal .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+
+.calc-recipe-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  min-height: 160px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.calc-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: calc-spin 0.8s linear infinite;
+}
+
+@keyframes calc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.calc-recipe-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Tag Select Modal */
+
+.calc-tag-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.calc-tag-select-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.calc-tag-select-card:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.calc-tag-select-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-tag-select-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-tag-select-name {
+  font-size: 0.72rem;
+  color: var(--text);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Recipe Select Modal Tabs */
+
+.calc-recipe-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-recipe-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 4px 10px 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.calc-recipe-tab:hover {
+  border-color: var(--accent);
+}
+
+.calc-recipe-tab.modal-tab-active {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.calc-recipe-tab-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+.calc-recipe-tab-icon .category-icon-atlas,
+.calc-recipe-tab-icon .icon-atlas {
+  display: block;
+  transform: scale(0.5);
+  transform-origin: top left;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.calc-recipe-tab-label {
+  display: inline-flex;
+  align-items: baseline;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.calc-recipe-tab-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+.calc-recipe-body {
+  padding: 12px;
+}
+
+/* Material list header */
+
+.calc-material-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.calc-material-list-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.calc-material-mode-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.calc-material-mode-toggle button {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.calc-material-mode-toggle button.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.calc-material-mode-toggle button:hover:not(.is-active) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* Target group in material drawer */
+
+.calc-material-target-group {
+  margin-bottom: 16px;
+}
+
+.calc-material-target-group:last-child {
+  margin-bottom: 0;
+}
+
+.calc-material-target-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.calc-material-target-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.calc-material-target-icon .icon-atlas {
+  width: 32px;
+  height: 32px;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.calc-material-target-name {
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calc-material-target-amount {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.calc-material-target-body {
+  padding-left: 4px;
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+  .calc-tree-children {
+    margin-left: 12px;
+    padding-left: 8px;
+  }
+
+  .calc-summary {
+    position: static;
+  }
+}

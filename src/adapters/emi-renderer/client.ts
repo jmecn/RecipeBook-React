@@ -1,5 +1,7 @@
 import {
   EmiRecipeRenderer,
+  showEmiTagPopover,
+  hideEmiTagPopover,
   type EmiRendererOptions,
   type EmiMountOptions,
   type EmiLazyMountHandle,
@@ -53,6 +55,7 @@ export interface ConfigureEmiRendererOptions {
 type EmiRendererWithIcons = EmiRecipeRenderer & {
   onItemClick?: EmiRendererOptions['onItemClick'];
   onTagClick?: EmiRendererOptions['onTagClick'];
+  _tagPopoverEl?: HTMLElement | null;
   ensureIconStylesheets(): Promise<void>;
   ensureCategoryIconStylesheets?(): Promise<void>;
   setLocale?(locale: string): Promise<void> | void;
@@ -82,6 +85,7 @@ export interface EmiRendererClient {
   probeCategoryRecipeLayout(recipeIds: string[]): Promise<CategoryRecipeLayout>;
   observePendingRecipeCards(root: HTMLElement, panelKey: string, observeRoot: HTMLElement | null): IconMountSession;
   translateTag(tagId: string, options?: { baseUrl?: string; locale?: string }): Promise<string>;
+  showTagPopover(tagId: string, anchorEl: HTMLElement, onSelect: (itemId: string) => void): Promise<void>;
 }
 
 function mountOptionsFromClient(client: EmiRendererClientImpl): EmiMountOptions {
@@ -408,6 +412,46 @@ class EmiRendererClientImpl implements EmiRendererClient {
       return renderer.translateTag(tagId);
     }
     return tagId;
+  }
+
+  async showTagPopover(tagId: string, anchorEl: HTMLElement, onSelect: (itemId: string) => void) {
+    const renderer = await this.ensureReadyForMount() as EmiRendererWithIcons;
+    const prevOnItemClick = renderer.onItemClick;
+    const prevOnTagClick = renderer.onTagClick;
+    const popEl = renderer._tagPopoverEl as HTMLElement | null;
+
+    const restore = () => {
+      renderer.onItemClick = prevOnItemClick;
+      renderer.onTagClick = prevOnTagClick;
+      if (observer) observer.disconnect();
+    };
+
+    renderer.onItemClick = (itemId: string) => {
+      onSelect(itemId);
+      hideEmiTagPopover(popEl);
+      restore();
+    };
+
+    renderer.onTagClick = () => {
+      hideEmiTagPopover(popEl);
+      restore();
+    };
+
+    let observer: MutationObserver | null = null;
+    if (popEl) {
+      observer = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          if (m.type === 'attributes' && m.attributeName === 'hidden') {
+            if ((popEl as HTMLDivElement).hidden) {
+              restore();
+            }
+          }
+        }
+      });
+      observer.observe(popEl, { attributes: true, attributeFilter: ['hidden'] });
+    }
+
+    await showEmiTagPopover(tagId, anchorEl, renderer);
   }
 }
 
