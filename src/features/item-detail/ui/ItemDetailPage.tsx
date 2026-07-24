@@ -25,6 +25,9 @@ import {
 import { ItemDetailHeader } from './ItemDetailHeader';
 import { CategoryTabs } from './CategoryTabs';
 import { RecipeGridPanel } from './RecipeGridPanel';
+import { FavoritesDrawer } from '../../favorites/ui/FavoritesDrawer';
+import { useFavorites } from '../../favorites/hooks/useFavorites';
+import { encodeCalcState } from '../../../shared/lib/calc-base64';
 import '../../../styles/item-detail.css';
 
 interface ItemDetailPageProps {
@@ -62,6 +65,10 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
   const [usesCategory, setUsesCategory] = useState('');
   const [showAllTags, setShowAllTags] = useState(false);
   const { scrollElement: scrollRoot } = useViewerMain();
+
+  const { favorites, addItem, removeItem, isFavorite } = useFavorites();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedFavItems, setSelectedFavItems] = useState<Array<{ itemId: string; amount: number }>>([]);
   const detailScrollTop = useRef<Record<DetailTab, number>>({ recipes: 0, uses: 0, tags: 0 });
 
   const keyword = route.search;
@@ -227,9 +234,38 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
 
   const loading = Boolean(bundleId && detailQuery.isLoading);
 
+  const handleToggleFavorite = useCallback((favId: string) => {
+    if (isFavorite(favId)) {
+      removeItem(favId)
+    } else {
+      addItem(favId)
+    }
+  }, [isFavorite, addItem, removeItem])
+
+  const handleFavAddTarget = useCallback((favId: string, amount: number) => {
+    setSelectedFavItems(prev => {
+      const exists = prev.some(i => i.itemId === favId)
+      if (exists) {
+        return prev.map(i => i.itemId === favId ? { ...i, amount } : i)
+      }
+      return [...prev, { itemId: favId, amount }]
+    })
+  }, [])
+
+  const handleFavRemoveTarget = useCallback((favId: string) => {
+    setSelectedFavItems(prev => prev.filter(i => i.itemId !== favId))
+  }, [])
+
+  const handleFavCalculate = useCallback((items: Array<{ itemId: string; amount: number }>) => {
+    const state = { targets: items, selections: {}, collapsed: {} }
+    const encoded = encodeCalcState(state)
+    const url = buildNavUrl(route, { view: 'calculator', calc: encoded })
+    navigate(url)
+  }, [navigate, route])
+
   return (
     <section className="item-detail-page">
-      <ItemDetailHeader itemId={itemId} baseUrl={baseUrl} locale={locale} route={route} loading={loading} />
+      <ItemDetailHeader itemId={itemId} baseUrl={baseUrl} locale={locale} route={route} loading={loading} isFavorite={isFavorite(itemId)} onToggleFavorite={handleToggleFavorite} />
 
       {!bundleId && <p className="app-empty">{t('noBundle')}</p>}
       {bundleId && detailQuery.isError && <p className="text-red-400">{t('loadFailed')}</p>}
@@ -270,10 +306,9 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
             />
             {recipeCount === 0 && <p className="app-empty">{t('emptyRecipes')}</p>}
             <RecipeGridPanel
-              key={`recipes:${activeRecipeCategory}:${keyword}`}
               recipeIds={recipeIds}
               panelKey="recipes"
-              scrollRoot={scrollRoot}
+              bundleId={bundleId}
               enabled={activeTab === 'recipes' && recipeIds.length > 0}
               onRecipeIdClick={openRecipe}
               copyRecipeIdLabels={copyRecipeIdLabels}
@@ -293,10 +328,9 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
             />
             {usesCount === 0 && <p className="app-empty">{t('emptyUses')}</p>}
             <RecipeGridPanel
-              key={`uses:${activeUsesCategory}:${keyword}`}
               recipeIds={useIds}
               panelKey="uses"
-              scrollRoot={scrollRoot}
+              bundleId={bundleId}
               enabled={activeTab === 'uses' && useIds.length > 0}
               onRecipeIdClick={openRecipe}
               copyRecipeIdLabels={copyRecipeIdLabels}
@@ -334,6 +368,21 @@ export function ItemDetailPage({ itemId }: ItemDetailPageProps) {
           </section>
         </>
       )}
+      <FavoritesDrawer
+        baseUrl={baseUrl}
+        locale={locale}
+        labels={langQuery.data?.labels}
+        route={route}
+        isOpen={drawerOpen}
+        onToggle={() => setDrawerOpen(!drawerOpen)}
+        favorites={favorites}
+        onRemoveFavorite={removeItem}
+        onToggleFavorite={handleToggleFavorite}
+        selectedItems={selectedFavItems}
+        onCalculate={handleFavCalculate}
+        onAddTarget={handleFavAddTarget}
+        onRemoveTarget={handleFavRemoveTarget}
+      />
     </section>
   );
 }

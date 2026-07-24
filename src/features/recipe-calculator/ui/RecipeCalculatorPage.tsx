@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
@@ -44,6 +44,7 @@ export function RecipeCalculatorPage() {
 
   const [selectingFor, setSelectingFor] = useState<string | null>(null);
   const [inputItem, setInputItem] = useState('');
+  const [searchLimit, setSearchLimit] = useState(20);
   const [showExport, setShowExport] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
@@ -133,10 +134,29 @@ export function RecipeCalculatorPage() {
     });
   }, []);
 
-  const filteredItems = useMemo(() => {
+  const allFiltered = useMemo(() => {
     if (!inputItem.trim()) return [];
-    return filterItemIds(items, inputItem, langQuery.data?.searchRows ?? null, langLabels).slice(0, 20);
+    return filterItemIds(items, inputItem, langQuery.data?.searchRows ?? null, langLabels);
   }, [inputItem, items, langQuery.data?.searchRows, langLabels]);
+
+  const filteredItems = useMemo(() => {
+    return allFiltered.slice(0, searchLimit);
+  }, [allFiltered, searchLimit]);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || allFiltered.length <= filteredItems.length) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setSearchLimit(prev => prev + 20);
+        observer.unobserve(el);
+      }
+    }, { rootMargin: '40px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [allFiltered.length, filteredItems.length]);
 
   useEffect(() => {
     if (!baseUrl) return;
@@ -171,7 +191,10 @@ export function RecipeCalculatorPage() {
             className="site-search-input"
             placeholder={t('calcSearchItem')}
             value={inputItem}
-            onChange={(e) => setInputItem(e.target.value)}
+            onChange={(e) => {
+              setInputItem(e.target.value);
+              setSearchLimit(20);
+            }}
           />
           {filteredItems.length > 0 && (
             <div className="calc-search-results">
@@ -194,6 +217,7 @@ export function RecipeCalculatorPage() {
                   </span>
                 </button>
               ))}
+              <div ref={sentinelRef} className="calc-search-sentinel" />
             </div>
           )}
         </div>

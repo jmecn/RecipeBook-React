@@ -168,10 +168,12 @@ export function ItemListPage() {
         baseUrl={baseUrl}
         locale={locale}
         labels={labels}
+        route={route}
         isOpen={drawerOpen}
         onToggle={() => setDrawerOpen(!drawerOpen)}
         favorites={favorites}
         onRemoveFavorite={removeItem}
+        onToggleFavorite={handleToggleFavorite}
         selectedItems={selectedFavItems}
         onCalculate={handleFavCalculate}
         onAddTarget={handleFavAddTarget}

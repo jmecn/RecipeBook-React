@@ -1,54 +1,41 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useI18n } from '../../../shared/i18n/useI18n'
 import type { FavoriteItem } from '../model/types'
 import { FavoriteItemRow } from './FavoriteItemRow'
+import type { AppRoute } from '../../../shared/lib/location-query'
 
 interface FavoritesDrawerProps {
   baseUrl: string
   locale: string
   labels?: Record<string, string>
+  route: AppRoute
   isOpen: boolean
   onToggle: () => void
   favorites: FavoriteItem[]
   onRemoveFavorite: (itemId: string) => void
+  onToggleFavorite: (itemId: string) => void
   selectedItems: Array<{ itemId: string; amount: number }>
   onCalculate: (items: Array<{ itemId: string; amount: number }>) => void
   onAddTarget: (itemId: string, amount: number) => void
   onRemoveTarget: (itemId: string) => void
 }
 
-const AMOUNTS_STORAGE_KEY = 'tfg-favorite-amounts'
-
-function loadAmounts(): Record<string, number> {
-  try {
-    const raw = localStorage.getItem(AMOUNTS_STORAGE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw)
-    return typeof parsed === 'object' && parsed !== null ? parsed : {}
-  } catch {
-    return {}
-  }
-}
-
-function saveAmounts(amounts: Record<string, number>) {
-  localStorage.setItem(AMOUNTS_STORAGE_KEY, JSON.stringify(amounts))
-}
-
 export function FavoritesDrawer({
   baseUrl,
   locale,
   labels,
+  route,
   isOpen,
   onToggle,
   favorites,
   onRemoveFavorite,
+  onToggleFavorite,
   selectedItems,
   onCalculate,
   onAddTarget,
   onRemoveTarget,
 }: FavoritesDrawerProps) {
   const { t } = useI18n()
-  const [amounts, setAmounts] = useState<Record<string, number>>(loadAmounts)
   const drawerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -69,30 +56,14 @@ export function FavoritesDrawer({
     if (selectedSet.has(itemId)) {
       onRemoveTarget(itemId)
     } else {
-      const amount = amounts[itemId] || 1
-      onAddTarget(itemId, amount)
-    }
-  }
-
-  const handleAmountChange = (itemId: string, amount: number) => {
-    setAmounts(prev => {
-      const next = { ...prev, [itemId]: amount }
-      saveAmounts(next)
-      return next
-    })
-    if (selectedSet.has(itemId)) {
-      onRemoveTarget(itemId)
-      onAddTarget(itemId, amount)
+      onAddTarget(itemId, 1)
     }
   }
 
   const handleCalculate = () => {
     const items = favorites
       .filter(fav => selectedSet.has(fav.itemId))
-      .map(fav => ({
-        itemId: fav.itemId,
-        amount: amounts[fav.itemId] || 1,
-      }))
+      .map(fav => ({ itemId: fav.itemId, amount: 1 }))
     if (items.length > 0) {
       onCalculate(items)
     }
@@ -136,12 +107,12 @@ export function FavoritesDrawer({
                 itemId={fav.itemId}
                 label={labels?.[fav.itemId]}
                 isSelected={selectedSet.has(fav.itemId)}
-                amount={amounts[fav.itemId] || 1}
                 baseUrl={baseUrl}
                 locale={locale}
+                route={route}
                 onToggleSelect={handleToggleSelect}
                 onRemove={onRemoveFavorite}
-                onAmountChange={handleAmountChange}
+                onToggleFavorite={onToggleFavorite}
               />
             ))
           )}

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { bundleBaseUrl, fetchJson } from '../../../shared/api/http'
+import { recipePathCandidates } from '../../../shared/lib/bundle'
 import type { RecipeMetaData, CalcRecipeSummary, CalcRecipe, CalcRecipeInput, CalcMaterial } from './types'
 
 function defaultAmount(kind: string, interaction: { amount?: number; amountMb?: number }): number {
@@ -100,18 +101,6 @@ export function parseMetaToRecipe(meta: RecipeMetaData, targetItemId: string): C
     outputs,
     targetOutputAmount: targetOutputAmount > 0 ? targetOutputAmount : 1,
   }
-}
-
-function recipePathCandidates(recipeId: string): string[] {
-  const idx = recipeId.indexOf(':')
-  if (idx <= 0 || idx >= recipeId.length - 1) return []
-  const namespace = recipeId.slice(0, idx)
-  const path = recipeId.slice(idx + 1)
-  const normalized = path.replace(/\\/g, '/').replace(/^\/+/, '')
-  return [
-    `recipes/${namespace}/${normalized.replace(/\//g, '_')}.json`,
-    `recipes/${namespace}/${path.replace(/\//g, '_')}.json`,
-  ]
 }
 
 export async function loadItemOutputs(bundleId: string, itemId: string): Promise<Record<string, string[]>> {
@@ -222,7 +211,7 @@ export function useRecipeMetas(
   })
 }
 
-const CONCURRENCY = 8
+const CONCURRENCY = 16
 
 async function fetchRecipeMeta(
   bundleId: string,

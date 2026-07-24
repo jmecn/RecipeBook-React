@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
@@ -11,6 +11,7 @@ import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { RecipeIdCopyButton } from '../../../shared/ui/RecipeIdCopyButton';
 import { encodeCalcState } from '../../../shared/lib/calc-base64';
+import { FavoriteAddButton } from '../../favorites/ui/FavoriteAddButton';
 
 interface ItemDetailHeaderProps {
   itemId: string;
@@ -18,11 +19,16 @@ interface ItemDetailHeaderProps {
   locale: string;
   route: AppRoute;
   loading?: boolean;
+  isFavorite?: boolean;
+  onToggleFavorite?: (itemId: string) => void;
 }
 
-export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: ItemDetailHeaderProps) {
+export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading, isFavorite = false, onToggleFavorite }: ItemDetailHeaderProps) {
   const navigate = useNavigate();
   const { t } = useI18n();
+  const handleToggleFavorite = useCallback(() => {
+    onToggleFavorite?.(itemId);
+  }, [itemId, onToggleFavorite]);
   const copyItemIdLabels = useMemo(
     () => ({ copyAria: t('copyAria'), copiedAria: t('copiedAria') }),
     [t],
@@ -71,7 +77,10 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
       </button>
       {!loading && <div className="item-detail-icon" ref={iconRef} />}
       <div className="item-detail-body">
-        <h1 ref={titleRef} className={`item-detail-title${loading ? ' is-loading' : ''}`} />
+        <div className="item-detail-title-row">
+          <h1 ref={titleRef} className={`item-detail-title${loading ? ' is-loading' : ''}`} />
+          {!loading && onToggleFavorite && <FavoriteAddButton itemId={itemId} isFavorite={isFavorite} onToggle={handleToggleFavorite} />}
+        </div>
         <div className="item-detail-id-row">
           <p className="item-detail-id">{itemId}</p>
           {!loading && <RecipeIdCopyButton recipeId={itemId} labels={copyItemIdLabels} />}
@@ -80,12 +89,11 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading }: It
       {!loading && (
         <button
           type="button"
-          className="item-detail-back"
-          aria-label="Recipe Calculator"
+          className="item-detail-calc"
           onClick={handleOpenCalculator}
-          title="Recipe Calculator"
+          title={t('favoritesCalcButton')}
         >
-          🧮
+          {t('favoritesCalcButton')}
         </button>
       )}
     </header>
