@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../../shared/i18n/useI18n';
+import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useItemOutputs, useAllRecipeOutputs, useRecipeMetas } from '../model/queries';
 import { MaterialIcon } from './MaterialIcon';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
@@ -26,11 +27,9 @@ interface CalcTargetTreeProps {
   locale: string
   langLabels: Record<string, string>
   selections: Record<string, string>
-  collapsed: Record<string, boolean>
   tagItemSelections: Record<string, string>
   tagFluidSelections: Record<string, string>
   onSelectRecipe: (materialId: string) => void
-  onCollapse: (materialId: string) => void
   onClearSelection: (materialId: string) => void
   onClearTagSelection: (tagId: string) => void
   onSelectTag: (tagId: string, anchorEl: HTMLElement) => void
@@ -47,11 +46,9 @@ export function CalcTargetTree({
   locale,
   langLabels,
   selections,
-  collapsed,
   tagItemSelections,
   tagFluidSelections,
   onSelectRecipe,
-  onCollapse,
   onClearSelection,
   onClearTagSelection,
   onSelectTag,
@@ -60,6 +57,7 @@ export function CalcTargetTree({
   onSummaryReady,
 }: CalcTargetTreeProps) {
   const { t } = useI18n();
+  const route = useAppRoute();
   const itemOutputsQuery = useItemOutputs(bundleId, target.itemId);
   const recipeOutputsQuery = useAllRecipeOutputs(bundleId, target.itemId, itemOutputsQuery.data);
 
@@ -172,11 +170,10 @@ export function CalcTargetTree({
             baseUrl={baseUrl}
             locale={locale}
             langLabels={langLabels}
-            collapsed={collapsed}
+            route={route}
             tagItemSelections={tagItemSelections}
             tagFluidSelections={tagFluidSelections}
             onSelectRecipe={onSelectRecipe}
-            onCollapse={onCollapse}
             onClearSelection={onClearSelection}
             onSelectTag={onSelectTag}
             onClearTagSelection={onClearTagSelection}

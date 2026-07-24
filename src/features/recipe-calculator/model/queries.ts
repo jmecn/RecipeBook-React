@@ -1,10 +1,13 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { stripRegistryId } from 'emi-recipe-renderer'
 import { bundleBaseUrl, fetchJson } from '../../../shared/api/http'
 import { recipePathCandidates } from '../../../shared/lib/bundle'
 import type { RecipeMetaData, CalcRecipeSummary, CalcRecipe, CalcRecipeInput, CalcMaterial } from './types'
 
 const EXCLUDED_CATEGORIES = new Set(['create:automatic_shaped'])
+
+
 
 function defaultAmount(kind: string, interaction: { amount?: number; amountMb?: number }): number {
   if (kind === 'fluid') return interaction.amountMb ?? 0
@@ -22,7 +25,7 @@ export function parseMetaToRecipe(meta: RecipeMetaData, targetItemId: string): C
 
     if (kind === 'item') {
       const material: CalcMaterial = {
-        id: interaction.id ?? '',
+        id: stripRegistryId(interaction.id ?? ''),
         kind: 'item',
         amount: defaultAmount(kind, interaction),
       }
@@ -54,7 +57,7 @@ export function parseMetaToRecipe(meta: RecipeMetaData, targetItemId: string): C
 
     if (kind === 'tag') {
       const rawDisplayId = interaction.displayId ?? interaction.tag ?? ''
-      const displayId = rawDisplayId.includes('@') ? rawDisplayId.split('@')[0] : rawDisplayId
+      const displayId = stripRegistryId(rawDisplayId)
       inputs.push({
         id: displayId,
         kind: interaction.tagKind === 'fluid' ? 'fluid' : 'item',
@@ -70,7 +73,7 @@ export function parseMetaToRecipe(meta: RecipeMetaData, targetItemId: string): C
         if (entry.kind === 'item' || entry.kind === 'fluid') {
           const entryKind: 'item' | 'fluid' = entry.kind === 'fluid' ? 'fluid' : 'item'
           const mat: CalcMaterial = {
-            id: entry.id ?? '',
+            id: stripRegistryId(entry.id ?? ''),
             kind: entryKind,
             amount: defaultAmount(entry.kind, entry),
           }

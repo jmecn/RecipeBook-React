@@ -1,8 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
-import type { CalcNode } from '../model/types'
+import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../../../shared/i18n/useI18n'
+import type { CalcNode } from '../model/types'
 import { MaterialIcon } from './MaterialIcon'
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel'
+import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query'
 import { formatMaterialAmount, resolveLabel } from '../lib/utils'
 import { RecipeTooltip } from './RecipeTooltip'
 
@@ -12,11 +14,10 @@ interface RecipeTreeNodeProps {
   baseUrl: string
   locale: string
   langLabels: Record<string, string>
-  collapsed: Record<string, boolean>
+  route: AppRoute
   tagItemSelections: Record<string, string>
   tagFluidSelections: Record<string, string>
   onSelectRecipe: (materialId: string) => void
-  onCollapse: (materialId: string) => void
   onClearSelection: (materialId: string) => void
   onSelectTag: (tagId: string, anchorEl: HTMLElement) => void
   onClearTagSelection: (tagId: string) => void
@@ -28,41 +29,23 @@ export function RecipeTreeNode({
   baseUrl,
   locale,
   langLabels,
-  collapsed,
+  route,
   tagItemSelections,
   tagFluidSelections,
   onSelectRecipe,
-  onCollapse,
   onClearSelection,
   onSelectTag,
   onClearTagSelection,
 }: RecipeTreeNodeProps) {
-  const { t } = useI18n();
+  const { t } = useI18n()
+  const navigate = useNavigate()
   const hasRecipe = node.recipe !== null
-  const hasAvailableRecipes = node.availableRecipes.length > 0
-  const isRoot = node.depth === 0
-  const isClickable = hasRecipe || (!isRoot) || hasAvailableRecipes
-  const isCollapsed = collapsed[node.materialId] === true
 
   const label = resolveLabel(langLabels, node.materialId)
   const amountDisplay = formatMaterialAmount(node.kind, node.amount)
 
-  const tagSelections = node.tagId
-    ? (node.kind === 'fluid' ? tagFluidSelections : tagItemSelections)
-    : undefined
-  const hasTagSelection = node.tagId ? Boolean(tagSelections![node.tagId]) : false
-
   const [showTooltip, setShowTooltip] = useState(false)
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
-
-  const handleClick = useCallback(() => {
-    if (hasRecipe) {
-      onCollapse(node.materialId)
-    } else {
-      onSelectRecipe(node.materialId)
-    }
-  }, [hasRecipe, node.materialId, onCollapse, onSelectRecipe])
-
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
@@ -84,85 +67,73 @@ export function RecipeTreeNode({
     setShowTooltip(false)
   }, [])
 
-  const toggleIcon = hasRecipe ? (isCollapsed ? '\u25B6' : '\u25BC') : '\u25B6'
-
-  const showChildren = hasRecipe && !isCollapsed
+  const detailUrl = node.recipe
+    ? buildNavUrl(route, { view: 'recipe', id: node.recipe.recipeId, lang: locale })
+    : buildNavUrl(route, { view: 'item', id: node.materialId, lang: locale })
 
   return (
     <div className="calc-tree-node">
-      <div
-        className={`calc-tree-row${isClickable ? ' is-clickable' : ''}${isRoot ? ' is-root' : ''}`}
-        onClick={isClickable ? handleClick : undefined}
-        onMouseEnter={handleMouseEnter}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
-        onKeyDown={(e) => {
-          if (isClickable && (e.key === 'Enter' || e.key === ' ')) handleClick()
-        }}
-      >
-        <span className="calc-tree-toggle">{toggleIcon}</span>
-        <MaterialIcon
-          itemId={node.materialId}
-          bundleId={bundleId}
-          baseUrl={baseUrl}
-          locale={locale}
-          isTag={!!node.tagId}
-        />
-        <div className="calc-tree-label" title={node.materialId}>
-          <FormattedItemLabel label={label} className="calc-tree-label-inner" />
-        </div>
-        <span className="calc-tree-amount">x {amountDisplay}</span>
-        {node.tagId && (
-          <span className="calc-tree-tag-id">#{node.tagId}</span>
-        )}
-        {node.tagId && (
-          <>
-            {hasTagSelection && (
-              <button
-                type="button"
-                className="calc-tree-clear-btn"
-                title={t('calcResetTag')}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onClearTagSelection(node.tagId!)
-                }}
-              >
-                &times;
-              </button>
-            )}
-            <button
-              type="button"
-              className="calc-tree-select-btn"
-              title={t('calcSelectTag')}
-              onClick={(e) => {
-                e.stopPropagation()
-                onSelectTag(node.tagId!, e.currentTarget)
-              }}
-            >
-              {hasTagSelection ? '\u21BB' : '\u00B7\u00B7\u00B7'}
-            </button>
-          </>
-        )}
-        {hasRecipe && (
-          <span className="calc-tree-recipe">x{node.multiplier}</span>
+      <div className="calc-tree-row">
+        {!hasRecipe && (
+          <button
+            type="button"
+            className="calc-tree-recipe-btn"
+            title={t('calcSelectTag')}
+            onClick={() => onSelectRecipe(node.materialId)}
+          >
+            +
+          </button>
         )}
         {hasRecipe && (
           <button
             type="button"
-            className="calc-tree-clear-btn"
+            className="calc-tree-recipe-btn"
             title={t('calcClearRecipe')}
+            onClick={() => onClearSelection(node.materialId)}
+          >
+            {'\u2212'}
+          </button>
+        )}
+        <span
+          className="calc-tree-info"
+          onMouseEnter={handleMouseEnter}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <MaterialIcon
+            itemId={node.materialId}
+            bundleId={bundleId}
+            baseUrl={baseUrl}
+            locale={locale}
+            isTag={!!node.tagId}
+          />
+          <div className="calc-tree-text">
+            <a
+            className="calc-tree-name"
+            href={detailUrl}
+            title={node.materialId}
+            onClick={(e) => { e.preventDefault(); navigate(detailUrl) }}
+          >
+            <FormattedItemLabel label={label} />
+          </a>
+          <span className="calc-tree-amount"> x {amountDisplay}</span>
+          </div>
+        </span>
+        {node.tagId && (
+          <button
+            type="button"
+            className="calc-tree-tag-id"
+            title={node.tagId}
             onClick={(e) => {
               e.stopPropagation()
-              onClearSelection(node.materialId)
+              onSelectTag(node.tagId!, e.currentTarget)
             }}
           >
-            &times;
+            #
           </button>
         )}
       </div>
-      {showChildren && node.children.length > 0 && (
+      {hasRecipe && node.children.length > 0 && (
         <div className="calc-tree-children">
           {node.children.map((child, index) => (
             <RecipeTreeNode
@@ -172,11 +143,10 @@ export function RecipeTreeNode({
               baseUrl={baseUrl}
               locale={locale}
               langLabels={langLabels}
-              collapsed={collapsed}
+              route={route}
               tagItemSelections={tagItemSelections}
               tagFluidSelections={tagFluidSelections}
               onSelectRecipe={onSelectRecipe}
-              onCollapse={onCollapse}
               onClearSelection={onClearSelection}
               onSelectTag={onSelectTag}
               onClearTagSelection={onClearTagSelection}
@@ -184,24 +154,32 @@ export function RecipeTreeNode({
           ))}
         </div>
       )}
-      {showChildren && node.byproducts.length > 0 && (
+      {hasRecipe && node.byproducts.length > 0 && (
         <div className="calc-tree-children">
           {node.byproducts.map((bp, index) => {
             const bpLabel = resolveLabel(langLabels, bp.id)
             const bpAmount = formatMaterialAmount(bp.kind, bp.amount)
+            const bpUrl = buildNavUrl(route, { view: 'item', id: bp.id, lang: locale })
             return (
               <div key={`bp:${bp.id}:${index}`} className="calc-tree-row is-byproduct">
-                <span className="calc-tree-toggle">+</span>
+                <span className="calc-tree-recipe-spacer" />
                 <MaterialIcon
                   itemId={bp.id}
                   bundleId={bundleId}
                   baseUrl={baseUrl}
                   locale={locale}
                 />
-                <div className="calc-tree-label" title={bp.id}>
-                  <FormattedItemLabel label={bpLabel} className="calc-tree-label-inner" />
+        <div className="calc-tree-text" onMouseEnter={handleMouseEnter} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+                  <a
+                    className="calc-tree-name"
+                    href={bpUrl}
+                    title={bp.id}
+                    onClick={(e) => { e.preventDefault(); navigate(bpUrl) }}
+                  >
+                    <FormattedItemLabel label={bpLabel} />
+                  </a>
+                  <span className="calc-tree-amount"> x {bpAmount}</span>
                 </div>
-                <span className="calc-tree-amount">x {bpAmount}</span>
               </div>
             )
           })}

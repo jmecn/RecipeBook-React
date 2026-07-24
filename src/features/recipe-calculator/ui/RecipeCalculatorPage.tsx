@@ -34,13 +34,12 @@ export function RecipeCalculatorPage() {
     removeTarget,
     setTargetAmount,
     setSelection,
-    toggleCollapsed,
     importState,
     tagItemSelections,
     tagFluidSelections,
     setTagItemSelection,
   } = useCalculatorState();
-  const { targets, selections, collapsed } = state;
+  const { targets, selections } = state;
 
   const [selectingFor, setSelectingFor] = useState<string | null>(null);
   const [inputItem, setInputItem] = useState('');
@@ -103,10 +102,6 @@ export function RecipeCalculatorPage() {
     }
     setSelectingFor(null);
   }, [selectingFor, setSelection]);
-
-  const handleCollapse = useCallback((materialId: string) => {
-    toggleCollapsed(materialId);
-  }, [toggleCollapsed]);
 
   const handleClearSelection = useCallback((materialId: string) => {
     setSelection(materialId, null);
@@ -271,11 +266,9 @@ export function RecipeCalculatorPage() {
               locale={locale}
               langLabels={langLabels}
               selections={selections}
-              collapsed={collapsed}
               tagItemSelections={tagItemSelections}
               tagFluidSelections={tagFluidSelections}
               onSelectRecipe={handleSelectRecipe}
-              onCollapse={handleCollapse}
               onClearSelection={handleClearSelection}
               onSelectTag={handleSelectTag}
               onClearTagSelection={handleClearTagSelection}

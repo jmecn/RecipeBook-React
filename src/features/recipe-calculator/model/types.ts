@@ -46,7 +46,6 @@ export interface CalculatorTarget {
 export interface CalculatorState {
   targets: CalculatorTarget[]
   selections: Record<string, string>
-  collapsed: Record<string, boolean>
 }
 
 export interface CalcMaterialSummary {

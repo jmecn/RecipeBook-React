@@ -1,5 +1,8 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useI18n } from '../../../shared/i18n/useI18n'
+import { useAppRoute } from '../../../shared/hooks/useAppRoute'
+import { buildNavUrl } from '../../../shared/lib/location-query'
 import type { CalcMaterial } from '../model/types'
 import type { CalcTargetSummary } from './CalcTargetTree'
 import { MaterialIcon } from './MaterialIcon'
@@ -30,10 +33,18 @@ function MaterialCard({
   baseUrl: string
   locale: string
 }) {
+  const navigate = useNavigate()
+  const route = useAppRoute()
   const label = resolveLabel(langLabels, material.id)
   const amount = formatMaterialAmount(material.kind, material.amount)
+  const href = buildNavUrl(route, { view: 'item', id: material.id, lang: locale })
   return (
-    <div className="calc-material-card" title={material.id}>
+    <a
+      className="calc-material-card"
+      href={href}
+      title={material.id}
+      onClick={(e) => { e.preventDefault(); navigate(href) }}
+    >
       <MaterialIcon
         itemId={material.id}
         bundleId={bundleId}
@@ -45,7 +56,7 @@ function MaterialCard({
         <FormattedItemLabel label={label} className="calc-material-card-name" />
         <span className="calc-material-card-amount">×{amount}</span>
       </div>
-    </div>
+    </a>
   )
 }
 

@@ -241,5 +241,5 @@ export function countTreeStats(node: CalcNode): { recipeCount: number; maxDepth:
 }
 
 export function createEmptyState(): CalculatorState {
-  return { targets: [], selections: {}, collapsed: {} }
+  return { targets: [], selections: {} }
 }

@@ -45,9 +45,6 @@ export function decodeCalcState(encoded: string): CalculatorState | null {
             selections: obj.selections && typeof obj.selections === 'object'
               ? obj.selections as Record<string, string>
               : {},
-            collapsed: obj.collapsed && typeof obj.collapsed === 'object'
-              ? obj.collapsed as Record<string, boolean>
-              : {},
           };
         }
       }
@@ -57,9 +54,6 @@ export function decodeCalcState(encoded: string): CalculatorState | null {
           targets: [{ itemId: String(obj.item), amount: Number(obj.amount) || 1 }],
           selections: obj.selections && typeof obj.selections === 'object'
             ? obj.selections as Record<string, string>
-            : {},
-          collapsed: obj.collapsed && typeof obj.collapsed === 'object'
-            ? obj.collapsed as Record<string, boolean>
             : {},
         };
       }

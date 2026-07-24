@@ -599,7 +599,7 @@
 /* Tree */
 
 .calc-tree {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
 }
 
 .calc-tree-node {
@@ -624,29 +624,58 @@
 
 .calc-tree-row.is-root {
   font-weight: 600;
-  font-size: 0.95rem;
-  padding: 6px 8px;
+  font-size: 0.88rem;
+  padding: 5px 8px;
 }
 
-.calc-tree-row.is-clickable {
-  cursor: pointer;
-}
 
-.calc-tree-row.is-clickable:hover {
-  background: color-mix(in srgb, var(--accent) 8%, var(--bg));
-}
 
 .calc-tree-row.is-byproduct {
   opacity: 0.75;
 }
 
-.calc-tree-toggle {
-  flex: 0 0 16px;
-  width: 16px;
-  text-align: center;
-  font-size: 0.7rem;
+.calc-tree-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.calc-tree-text {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.calc-tree-recipe-spacer {
+  flex: 0 0 24px;
+  width: 24px;
+}
+
+.calc-tree-recipe-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
   color: var(--muted);
-  user-select: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-tree-recipe-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .calc-tree-icon {
@@ -728,70 +757,46 @@
   max-width: 100%;
 }
 
-.calc-tree-label {
-  flex-shrink: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+.calc-tree-name {
+  color: var(--link);
+  text-decoration: none;
+  font-weight: 500;
   white-space: nowrap;
-  color: var(--text);
+  font-size: 0.78rem;
+  line-height: 1.2;
 }
 
-.calc-tree-label-inner {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.calc-tree-name:hover {
+  text-decoration: underline;
+}
+
+.calc-tree-name :where(span) {
   white-space: nowrap;
 }
 
 .calc-tree-amount {
-  flex-shrink: 0;
+  font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
-}
-
-.calc-tree-recipe {
-  flex-shrink: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
   white-space: nowrap;
-  font-size: 0.78rem;
-  color: var(--muted);
 }
 
-.calc-tree-clear-btn {
+
+
+.calc-tree-tag-id {
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 0.85rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.calc-tree-clear-btn:hover {
-  color: #ef4444;
-  background: color-mix(in srgb, #ef4444 10%, transparent);
-}
-
-.calc-tree-select-btn {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   padding: 0;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
   line-height: 1;
   display: flex;
   align-items: center;
@@ -799,20 +804,10 @@
   margin-left: 4px;
 }
 
-.calc-tree-select-btn:hover {
+.calc-tree-tag-id:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
-}
-
-.calc-tree-tag-id {
-  flex-shrink: 0;
-  font-size: 0.68rem;
-  color: var(--muted);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  padding: 0 4px;
-  border-radius: 3px;
-  margin-left: 4px;
 }
 
 /* Summary panel */
@@ -1124,6 +1119,13 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   position: relative;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s;
+}
+
+.calc-material-card:hover {
+  border-color: var(--accent);
 }
 
 .calc-material-card-icon {
