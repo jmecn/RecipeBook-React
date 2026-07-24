@@ -9,6 +9,14 @@ import { buildTree, flattenTree, countTreeStats } from '../lib/calculator-engine
 import type { CalcRecipe, CalcNode, CalcMaterial, CalcRecipeSummary, CalculatorTarget } from '../model/types';
 import { RecipeTreeView } from './RecipeTreeView';
 
+function collectTreeMaterialIds(node: CalcNode): string[] {
+  const ids = [node.materialId]
+  for (const child of node.children) {
+    ids.push(...collectTreeMaterialIds(child))
+  }
+  return ids
+}
+
 export interface CalcTargetSummary {
   targetItemId: string
   targetAmount: number
@@ -17,6 +25,7 @@ export interface CalcTargetSummary {
   catalysts: CalcMaterial[]
   recipeCount: number
   maxDepth: number
+  materialIds: string[]
 }
 
 interface CalcTargetTreeProps {
@@ -96,7 +105,8 @@ export function CalcTargetTree({
     if (!root) return null;
     const { rawMaterials, byproducts, catalysts } = flattenTree(root);
     const { recipeCount, maxDepth } = countTreeStats(root);
-    return { targetItemId: target.itemId, targetAmount: target.amount, rawMaterials, byproducts, catalysts, recipeCount, maxDepth };
+    const materialIds = collectTreeMaterialIds(root);
+    return { targetItemId: target.itemId, targetAmount: target.amount, rawMaterials, byproducts, catalysts, recipeCount, maxDepth, materialIds };
   }, [root, target]);
 
   const prevSummaryRef = useRef<CalcTargetSummary | null>(null);

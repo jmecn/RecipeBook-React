@@ -665,7 +665,8 @@
 }
 
 .export-copy-btn,
-.import-submit-btn {
+.import-submit-btn,
+.export-download-btn {
   margin-top: 8px;
   padding: 8px 16px;
   border: none;
@@ -677,8 +678,18 @@
 }
 
 .export-copy-btn:hover,
-.import-submit-btn:hover {
+.import-submit-btn:hover,
+.export-download-btn:hover {
   opacity: 0.9;
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.export-download-btn {
+  background: color-mix(in srgb, var(--accent) 80%, var(--bg));
 }
 
 .import-error {
@@ -688,6 +699,25 @@
   background: color-mix(in srgb, #ef4444 10%, transparent);
   color: #ef4444;
   font-size: 0.85rem;
+}
+
+.import-drop-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.import-drag-over {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.import-submit-btn {
+  align-self: flex-start;
 }
 
 .calc-title {

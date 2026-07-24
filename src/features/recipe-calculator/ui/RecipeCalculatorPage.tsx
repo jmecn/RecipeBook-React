@@ -10,7 +10,7 @@ import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useCategoriesManifestQuery } from '../../item-detail/model/categories';
 import { filterItemIds } from '../../../shared/lib/item-labels';
 import { mergeAmounts, deduplicateMaterials } from '../lib/calculator-engine';
-import type { CalcMaterial } from '../model/types';
+import type { CalcMaterial, CalculatorState } from '../model/types';
 import { useCalculatorState } from '../hooks/useCalculatorState';
 import { encodeCalcState } from '../../../shared/lib/calc-base64';
 import { buildNavUrl } from '../../../shared/lib/location-query';
@@ -128,10 +128,13 @@ export function RecipeCalculatorPage() {
     setTagItemSelection(tagId, null);
   }, [setTagItemSelection]);
 
-  const handleImport = useCallback((newState: Parameters<typeof importState>[0]) => {
-    importState(newState);
+  const handleImport = useCallback((result: { state: CalculatorState; tagItemSelections: Record<string, string>; tagFluidSelections: Record<string, string> }) => {
+    importState(result.state);
+    for (const [k, v] of Object.entries(result.tagItemSelections)) {
+      setTagItemSelection(k, v)
+    }
     setTargetSummaries(new Map());
-  }, [importState]);
+  }, [importState, setTagItemSelection]);
 
   const handleAddTargetFromSearch = useCallback((itemId: string) => {
     addTarget(itemId, 1);
@@ -218,6 +221,23 @@ export function RecipeCalculatorPage() {
   const hasTargets = targets.length > 0;
   const hasSummary = targetSummaries.size > 0;
 
+  const exportJson = useMemo(() => {
+    const treeIds = new Set<string>()
+    targetSummaries.forEach(s => {
+      s.materialIds.forEach(id => treeIds.add(id))
+    })
+    const filteredSelections: Record<string, string> = {}
+    for (const [k, v] of Object.entries(state.selections)) {
+      if (treeIds.has(k)) filteredSelections[k] = v
+    }
+    return JSON.stringify({
+      targets: state.targets,
+      selections: filteredSelections,
+      tagItemSelections,
+      tagFluidSelections,
+    }, null, 2)
+  }, [state, targetSummaries, tagItemSelections, tagFluidSelections])
+
   return (
     <div className="calc-page">
       <div className="calc-toolbar">
@@ -263,14 +283,14 @@ export function RecipeCalculatorPage() {
             className="calc-toolbar-btn"
             onClick={() => setShowExport(true)}
           >
-            {t('importExportExport')}
+            {t('export')}
           </button>
           <button
             type="button"
             className="calc-toolbar-btn"
             onClick={() => setShowImport(true)}
           >
-            {t('importExportImport')}
+            {t('import')}
           </button>
           <button
             type="button"
@@ -351,7 +371,7 @@ export function RecipeCalculatorPage() {
       <ExportModal
         isOpen={showExport}
         onClose={() => setShowExport(false)}
-        currentState={state}
+        exportJson={exportJson}
       />
       <ImportModal
         isOpen={showImport}
