@@ -6,6 +6,7 @@ import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
 import { lookupItemLabel } from '../../../shared/lib/item-labels';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
+import { FavoriteAddButton } from '../../favorites/ui/FavoriteAddButton';
 
 interface ItemCardProps {
   itemId: string;
@@ -13,9 +14,11 @@ interface ItemCardProps {
   baseUrl: string;
   locale: string;
   route: AppRoute;
+  isFavorite?: boolean;
+  onToggleFavorite?: (itemId: string) => void;
 }
 
-export function ItemCard({ itemId, label, baseUrl, locale, route }: ItemCardProps) {
+export function ItemCard({ itemId, label, baseUrl, locale, route, isFavorite = false, onToggleFavorite }: ItemCardProps) {
   const { t } = useI18n();
   const iconRef = useRef<HTMLSpanElement | null>(null);
   const client = useMemo(() => getEmiRendererClient(), []);
@@ -37,6 +40,13 @@ export function ItemCard({ itemId, label, baseUrl, locale, route }: ItemCardProp
       to={buildNavUrl(route, { view: 'item', id: itemId, lang: locale })}
       className="item-card"
     >
+      {onToggleFavorite && (
+        <FavoriteAddButton
+          itemId={itemId}
+          isFavorite={isFavorite}
+          onToggle={onToggleFavorite}
+        />
+      )}
       <span className="item-card-icon" ref={iconRef} />
       <span className="item-card-text">
         <FormattedItemLabel label={displayLabel} className="item-card-name" />

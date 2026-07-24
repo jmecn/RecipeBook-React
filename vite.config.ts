@@ -10,6 +10,12 @@ const localesDir = path.join(rootDir, 'public/locales')
 export default defineConfig({
   base: './',
   plugins: [localeJson404Plugin(localesDir), react()],
+  server: {
+    allowedHosts: ['emi.jmecn.net'],
+    watch: {
+      ignored: ['**/public/bundles/**'],
+    },
+  },
   build: {
     copyPublicDir: false,
     reportCompressedSize: false,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EmiRecipeRenderer } from 'emi-recipe-renderer';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
+import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
 import {
   categoryDisplayLabel,
   categoryRecipeCount,
@@ -60,8 +60,8 @@ function CategoryTab({
   useEffect(() => {
     const el = labelRef.current;
     if (!el) return;
-    if (typeof EmiRecipeRenderer.setFormattedText === 'function') {
-      EmiRecipeRenderer.setFormattedText(el, label);
+    if (hasMinecraftFormatting(label)) {
+      applyMinecraftFormattedClasses(el, label);
     } else {
       el.textContent = stripFormatting(label);
     }

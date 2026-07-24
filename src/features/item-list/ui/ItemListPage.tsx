@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useI18n } from '../../../shared/i18n/useI18n';
-import { buildAppUrl } from '../../../shared/lib/location-query';
+import { buildAppUrl, buildNavUrl } from '../../../shared/lib/location-query';
 import { useNavigate } from 'react-router-dom';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useItemsCatalogQuery } from '../model/queries';
@@ -16,6 +16,9 @@ import { useViewerMain } from '../../../shared/hooks/useViewerMain';
 import { LIST_PAGE_SIZE } from '../../../shared/lib/pagination';
 import { ListPager } from '../../../shared/ui/ListPager';
 import { ItemCard } from './ItemCard';
+import { FavoritesDrawer } from '../../favorites/ui/FavoritesDrawer';
+import { useFavorites } from '../../favorites/hooks/useFavorites';
+import { encodeCalcState } from '../../../shared/lib/calc-base64';
 import '../../../styles/item-list.css';
 
 export function ItemListPage() {
@@ -28,6 +31,10 @@ export function ItemListPage() {
   const creativeTab = route.creativeTab;
   const page = route.page;
   const { scrollElement } = useViewerMain();
+
+  const { favorites, addItem, removeItem, isFavorite } = useFavorites();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedFavItems, setSelectedFavItems] = useState<Array<{ itemId: string; amount: number }>>([]);
 
   const itemsQuery = useItemsCatalogQuery(bundleId);
   const items = useMemo(
@@ -86,6 +93,39 @@ export function ItemListPage() {
     }
   }, [bundleId, navigate, page, route, totalPages]);
 
+  const handleToggleFavorite = useCallback((itemId: string) => {
+    if (isFavorite(itemId)) {
+      removeItem(itemId)
+    } else {
+      addItem(itemId)
+    }
+  }, [isFavorite, addItem, removeItem])
+
+  const handleFavCalculate = useCallback((items: Array<{ itemId: string; amount: number }>) => {
+    const state = {
+      targets: items,
+      selections: {},
+      collapsed: {},
+    }
+    const encoded = encodeCalcState(state)
+    const url = buildNavUrl(route, { view: 'calculator', calc: encoded })
+    navigate(url)
+  }, [navigate, route])
+
+  const handleFavAddTarget = useCallback((itemId: string, amount: number) => {
+    setSelectedFavItems(prev => {
+      const exists = prev.some(i => i.itemId === itemId)
+      if (exists) {
+        return prev.map(i => i.itemId === itemId ? { ...i, amount } : i)
+      }
+      return [...prev, { itemId, amount }]
+    })
+  }, [])
+
+  const handleFavRemoveTarget = useCallback((itemId: string) => {
+    setSelectedFavItems(prev => prev.filter(i => i.itemId !== itemId))
+  }, [])
+
   const creativeTabLoading = Boolean(creativeTab && membersQuery.isLoading);
 
   if (itemsQuery.isLoading || langQuery.isLoading || !langQuery.data || creativeTabLoading) {
@@ -111,6 +151,8 @@ export function ItemListPage() {
             baseUrl={baseUrl}
             locale={locale}
             route={route}
+            isFavorite={isFavorite(itemId)}
+            onToggleFavorite={handleToggleFavorite}
           />
         ))}
       </div>
@@ -121,6 +163,21 @@ export function ItemListPage() {
         onPage={(nextPage) => {
           navigate(buildAppUrl({ ...route, view: 'items', id: null, page: nextPage }));
         }}
+      />
+      <FavoritesDrawer
+        baseUrl={baseUrl}
+        locale={locale}
+        labels={labels}
+        route={route}
+        isOpen={drawerOpen}
+        onToggle={() => setDrawerOpen(!drawerOpen)}
+        favorites={favorites}
+        onRemoveFavorite={removeItem}
+        onToggleFavorite={handleToggleFavorite}
+        selectedItems={selectedFavItems}
+        onCalculate={handleFavCalculate}
+        onAddTarget={handleFavAddTarget}
+        onRemoveTarget={handleFavRemoveTarget}
       />
     </section>
   );

@@ -86,3 +86,6 @@ html:not([data-theme]) {
   --muted: var(--tfg-muted);
   --accent: var(--tfg-primary);
 }
+
+.mc-bold { font-weight: 700; }
+.mc-italic { font-style: italic; }

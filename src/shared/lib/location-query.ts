@@ -1,6 +1,6 @@
 import { decodeRouteParam } from './routing';
 
-export type AppView = 'items' | 'item' | 'tag' | 'recipe';
+export type AppView = 'items' | 'item' | 'tag' | 'recipe' | 'calculator';
 
 export interface AppRoute {
   view: AppView;
@@ -10,6 +10,7 @@ export interface AppRoute {
   page: number;
   lang: string | null;
   creativeTab: string | null;
+  calc: string | null;
 }
 
 export function parseLocationQuery(search: string): AppRoute {
@@ -22,15 +23,19 @@ export function parseLocationQuery(search: string): AppRoute {
   const tag = params.get('tag');
   const item = params.get('item');
   const lang = params.get('lang');
+  const calc = params.get('calc');
   const rawCreativeTab = params.get('ctab');
   const creativeTab = rawCreativeTab && rawCreativeTab.trim()
     ? decodeRouteParam(rawCreativeTab)
     : null;
 
-  if (recipe) {
-    return { view: 'recipe', id: decodeRouteParam(recipe), bundleToken, search: searchText, page, lang, creativeTab };
+  if (calc) {
+    return { view: 'calculator', id: null, calc, bundleToken, search: searchText, page, lang, creativeTab };
   }
-  if (tag) return { view: 'tag', id: decodeRouteParam(tag), bundleToken, search: searchText, page, lang, creativeTab };
+  if (recipe) {
+    return { view: 'recipe', id: decodeRouteParam(recipe), bundleToken, search: searchText, page, lang, creativeTab, calc: null };
+  }
+  if (tag) return { view: 'tag', id: decodeRouteParam(tag), bundleToken, search: searchText, page, lang, creativeTab, calc: null };
   if (item) {
     return {
       view: 'item',
@@ -40,9 +45,10 @@ export function parseLocationQuery(search: string): AppRoute {
       page,
       lang,
       creativeTab,
+      calc: null,
     };
   }
-  return { view: 'items', id: null, bundleToken, search: searchText, page, lang, creativeTab };
+  return { view: 'items', id: null, bundleToken, search: searchText, page, lang, creativeTab, calc: null };
 }
 
 export type AppRoutePatch = Partial<AppRoute>;
@@ -57,9 +63,10 @@ export function mergeAppRoute(current: AppRoute, patch: AppRoutePatch): AppRoute
     lang: patch.lang !== undefined ? patch.lang : current.lang,
     page: patch.page !== undefined ? patch.page : current.page,
     creativeTab: patch.creativeTab !== undefined ? patch.creativeTab : current.creativeTab,
+    calc: patch.calc !== undefined ? patch.calc : current.calc,
   };
 
-  if (view === 'items') {
+  if (view === 'items' || view === 'calculator') {
     route.id = null;
   }
 
@@ -109,6 +116,7 @@ export function buildAppUrl(route: AppRoute) {
   if (route.view === 'item' && route.id) params.set('item', route.id);
   if (route.view === 'tag' && route.id) params.set('tag', route.id);
   if (route.view === 'recipe' && route.id) params.set('recipe', route.id);
+  if (route.view === 'calculator' && route.calc) params.set('calc', route.calc);
   if (route.creativeTab) params.set('ctab', route.creativeTab);
   const query = params.toString();
   return query ? `/?${query}` : '/';

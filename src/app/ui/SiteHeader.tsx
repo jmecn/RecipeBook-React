@@ -117,7 +117,7 @@ export function SiteHeader() {
     }));
   };
 
-  const showSearch = route.view !== 'recipe';
+  const showSearch = route.view !== 'recipe' && route.view !== 'calculator';
 
   return (
     <header className="site-header">
