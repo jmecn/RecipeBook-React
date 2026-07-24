@@ -14,9 +14,11 @@ interface TagMemberCardProps {
   baseUrl: string;
   locale: string;
   route: AppRoute;
+  isFavorite?: boolean;
+  onToggleFavorite?: (itemId: string) => void;
 }
 
-export function TagMemberCard({ member, label, baseUrl, locale, route }: TagMemberCardProps) {
+export function TagMemberCard({ member, label, baseUrl, locale, route, isFavorite, onToggleFavorite }: TagMemberCardProps) {
   if (member.isItem) {
     return (
       <ItemCard
@@ -25,6 +27,8 @@ export function TagMemberCard({ member, label, baseUrl, locale, route }: TagMemb
         baseUrl={baseUrl}
         locale={locale}
         route={route}
+        isFavorite={isFavorite}
+        onToggleFavorite={onToggleFavorite}
       />
     );
   }

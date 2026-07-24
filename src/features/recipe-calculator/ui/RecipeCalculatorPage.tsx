@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
@@ -11,11 +12,15 @@ import { filterItemIds } from '../../../shared/lib/item-labels';
 import { mergeAmounts, deduplicateMaterials } from '../lib/calculator-engine';
 import type { CalcMaterial } from '../model/types';
 import { useCalculatorState } from '../hooks/useCalculatorState';
+import { encodeCalcState } from '../../../shared/lib/calc-base64';
+import { buildNavUrl } from '../../../shared/lib/location-query';
 import { MaterialSummary } from './MaterialSummary';
 import { ExportModal } from './ExportModal';
 import { ImportModal } from './ImportModal';
 import { RecipeSelectModal } from './RecipeSelectModal';
 import { CalcTargetTree, type CalcTargetSummary } from './CalcTargetTree';
+import { FavoritesDrawer } from '../../favorites/ui/FavoritesDrawer';
+import { useFavorites } from '../../favorites/hooks/useFavorites';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { getActiveTheme } from '../../../shared/lib/theme';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
@@ -23,6 +28,7 @@ import { MaterialIcon } from './MaterialIcon';
 
 export function RecipeCalculatorPage() {
   const { locale, t } = useI18n();
+  const navigate = useNavigate();
   const route = useAppRoute();
   const bundlesQuery = useBundlesManifestQuery();
   const bundleId = resolveBundleId(route.bundleToken, bundlesQuery.data?.default);
@@ -61,6 +67,10 @@ export function RecipeCalculatorPage() {
   );
   const categoriesQuery = useCategoriesManifestQuery(bundleId);
   const manifest = categoriesQuery.data ?? null;
+
+  const { favorites, addItem, removeItem, isFavorite } = useFavorites();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedFavItems, setSelectedFavItems] = useState<Array<{ itemId: string; amount: number }>>([]);
 
   const { rawMaterials, byproducts, catalysts } = useMemo(() => {
     const allRaw: CalcMaterial[] = [];
@@ -137,6 +147,28 @@ export function RecipeCalculatorPage() {
       return next;
     });
   }, []);
+
+  const handleToggleFavorite = useCallback((favId: string) => {
+    if (isFavorite(favId)) removeItem(favId)
+    else addItem(favId)
+  }, [isFavorite, addItem, removeItem])
+
+  const handleFavCalculate = useCallback((items: Array<{ itemId: string; amount: number }>) => {
+    const encoded = encodeCalcState({ targets: items, selections: {} })
+    navigate(buildNavUrl(route, { view: 'calculator', calc: encoded }), { replace: true })
+  }, [navigate, route])
+
+  const handleFavAddTarget = useCallback((favId: string, amount: number) => {
+    setSelectedFavItems(prev => {
+      const exists = prev.some(i => i.itemId === favId)
+      if (exists) return prev.map(i => i.itemId === favId ? { ...i, amount } : i)
+      return [...prev, { itemId: favId, amount }]
+    })
+  }, [])
+
+  const handleFavRemoveTarget = useCallback((favId: string) => {
+    setSelectedFavItems(prev => prev.filter(i => i.itemId !== favId))
+  }, [])
 
   const allFiltered = useMemo(() => {
     if (!inputItem.trim()) return [];
@@ -325,6 +357,21 @@ export function RecipeCalculatorPage() {
         isOpen={showImport}
         onClose={() => setShowImport(false)}
         onImport={handleImport}
+      />
+      <FavoritesDrawer
+        baseUrl={baseUrl}
+        locale={locale}
+        labels={langLabels}
+        route={route}
+        isOpen={drawerOpen}
+        onToggle={() => setDrawerOpen(!drawerOpen)}
+        favorites={favorites}
+        onRemoveFavorite={removeItem}
+        onToggleFavorite={handleToggleFavorite}
+        selectedItems={selectedFavItems}
+        onCalculate={handleFavCalculate}
+        onAddTarget={handleFavAddTarget}
+        onRemoveTarget={handleFavRemoveTarget}
       />
     </div>
   );

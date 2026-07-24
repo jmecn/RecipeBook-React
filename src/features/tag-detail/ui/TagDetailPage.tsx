@@ -1,7 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { buildAppUrl } from '../../../shared/lib/location-query';
+import { buildNavUrl } from '../../../shared/lib/location-query';
 import { useAppRoute } from '../../../shared/hooks/useAppRoute';
 import { LIST_PAGE_SIZE } from '../../../shared/lib/pagination';
 import { useBundlesManifestQuery } from '../../bundle/model/queries';
@@ -18,6 +19,9 @@ import { normalizedFilterQuery } from '../../../shared/lib/canonical-item-id';
 import { filterItemIds, lookupItemLabel } from '../../../shared/lib/item-labels';
 import { TagDetailHeader } from './TagDetailHeader';
 import { TagMemberCard } from './TagMemberCard';
+import { FavoritesDrawer } from '../../favorites/ui/FavoritesDrawer';
+import { useFavorites } from '../../favorites/hooks/useFavorites';
+import { encodeCalcState } from '../../../shared/lib/calc-base64';
 import '../../../styles/item-list.css';
 import '../../../styles/item-detail.css';
 
@@ -40,6 +44,32 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
   const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
   const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
   const labels = useMemo(() => langQuery.data?.labels ?? {}, [langQuery.data?.labels]);
+
+  const { favorites, addItem, removeItem, isFavorite } = useFavorites();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedFavItems, setSelectedFavItems] = useState<Array<{ itemId: string; amount: number }>>([]);
+
+  const handleToggleFavorite = useCallback((favId: string) => {
+    if (isFavorite(favId)) removeItem(favId)
+    else addItem(favId)
+  }, [isFavorite, addItem, removeItem])
+
+  const handleFavCalculate = useCallback((items: Array<{ itemId: string; amount: number }>) => {
+    const encoded = encodeCalcState({ targets: items, selections: {} })
+    navigate(buildNavUrl(route, { view: 'calculator', calc: encoded }))
+  }, [navigate, route])
+
+  const handleFavAddTarget = useCallback((favId: string, amount: number) => {
+    setSelectedFavItems(prev => {
+      const exists = prev.some(i => i.itemId === favId)
+      if (exists) return prev.map(i => i.itemId === favId ? { ...i, amount } : i)
+      return [...prev, { itemId: favId, amount }]
+    })
+  }, [])
+
+  const handleFavRemoveTarget = useCallback((favId: string) => {
+    setSelectedFavItems(prev => prev.filter(i => i.itemId !== favId))
+  }, [])
 
   const members = useMemo(() => {
     if (!tagQuery.data) return [];
@@ -114,6 +144,8 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
                 baseUrl={baseUrl}
                 locale={locale}
                 route={route}
+                isFavorite={member.isItem && isFavorite(member.id)}
+                onToggleFavorite={handleToggleFavorite}
               />
             ))}
           </div>
@@ -130,6 +162,21 @@ export function TagDetailPage({ tagId }: TagDetailPageProps) {
           />
         </>
       )}
+      <FavoritesDrawer
+        baseUrl={baseUrl}
+        locale={locale}
+        labels={labels}
+        route={route}
+        isOpen={drawerOpen}
+        onToggle={() => setDrawerOpen(!drawerOpen)}
+        favorites={favorites}
+        onRemoveFavorite={removeItem}
+        onToggleFavorite={handleToggleFavorite}
+        selectedItems={selectedFavItems}
+        onCalculate={handleFavCalculate}
+        onAddTarget={handleFavAddTarget}
+        onRemoveTarget={handleFavRemoveTarget}
+      />
     </section>
   );
 }
