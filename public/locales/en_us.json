@@ -85,5 +85,7 @@
   "materialSummaryMerged": "Merged",
   "materialSummaryByTarget": "By Target",
   "materialSummaryByproducts": "Byproducts",
-  "materialSummaryCatalysts": "Not Consumed"
+  "materialSummaryCatalysts": "Not Consumed",
+  "scrollLeft": "Scroll left",
+  "scrollRight": "Scroll right"
 }

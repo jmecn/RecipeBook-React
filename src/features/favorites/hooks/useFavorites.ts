@@ -53,6 +53,5 @@ export function useFavorites() {
     addItem,
     removeItem,
     isFavorite,
-    count: itemIds.length,
   }
 }

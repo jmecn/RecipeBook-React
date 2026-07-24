@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useI18n } from '../i18n/useI18n'
 
 interface ScrollableTabBarProps {
   className?: string
@@ -6,6 +7,7 @@ interface ScrollableTabBarProps {
 }
 
 export function ScrollableTabBar({ className = '', children }: ScrollableTabBarProps) {
+  const { t } = useI18n();
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -41,7 +43,7 @@ export function ScrollableTabBar({ className = '', children }: ScrollableTabBarP
           type="button"
           className="calc-tabs-scroll-btn calc-tabs-scroll-left"
           onClick={() => scrollBy(-200)}
-          aria-label="Scroll left"
+          aria-label={t('scrollLeft')}
         >
           {'\u25C0'}
         </button>
@@ -54,7 +56,7 @@ export function ScrollableTabBar({ className = '', children }: ScrollableTabBarP
           type="button"
           className="calc-tabs-scroll-btn calc-tabs-scroll-right"
           onClick={() => scrollBy(200)}
-          aria-label="Scroll right"
+          aria-label={t('scrollRight')}
         >
           {'\u25B6'}
         </button>

@@ -83,5 +83,7 @@
   "materialSummaryMerged": "合并",
   "materialSummaryByTarget": "按目标",
   "materialSummaryByproducts": "副产品",
-  "materialSummaryCatalysts": "不消耗"
+  "materialSummaryCatalysts": "不消耗",
+  "scrollLeft": "向左滚动",
+  "scrollRight": "向右滚动"
 }

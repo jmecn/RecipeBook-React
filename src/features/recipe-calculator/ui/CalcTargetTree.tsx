@@ -107,7 +107,7 @@ export function CalcTargetTree({
       prevSummaryRef.current = summary;
       onSummaryReady(summary);
     }
-  }, [summary]);
+  }, [summary, onSummaryReady]);
 
   const targetLabel = resolveLabel(langLabels, target.itemId);
 
