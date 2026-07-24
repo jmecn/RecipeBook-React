@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useItemOutputs, useAllRecipeOutputs, useRecipeMetas } from '../model/queries';
-import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { MaterialIcon } from './MaterialIcon';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
 import { resolveLabel } from '../lib/utils';
-import { getActiveTheme } from '../../../shared/lib/theme';
 import { buildTree, flattenTree, countTreeStats } from '../lib/calculator-engine';
 import type { CalcRecipe, CalcNode, CalcMaterial, CalcRecipeSummary, CalculatorTarget } from '../model/types';
 import { RecipeTreeView } from './RecipeTreeView';
@@ -60,8 +58,6 @@ export function CalcTargetTree({
   onAmountChange,
   onSummaryReady,
 }: CalcTargetTreeProps) {
-  const client = useMemo(() => getEmiRendererClient(), []);
-
   const itemOutputsQuery = useItemOutputs(bundleId, target.itemId);
   const recipeOutputsQuery = useAllRecipeOutputs(bundleId, target.itemId, itemOutputsQuery.data);
 
@@ -110,18 +106,6 @@ export function CalcTargetTree({
       onSummaryReady(summary);
     }
   }, [summary]);
-
-  useEffect(() => {
-    if (!baseUrl) return;
-    void client.configure({
-      baseUrl,
-      locale,
-      theme: getActiveTheme(),
-      registryLabels: langLabels,
-      onItemClick: () => {},
-      onTagClick: () => {},
-    });
-  }, [baseUrl, client, langLabels, locale]);
 
   const targetLabel = resolveLabel(langLabels, target.itemId);
 

@@ -3,10 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { bundleBaseUrl, fetchJson } from '../../../shared/api/http'
 import type { RecipeMetaData, CalcRecipeSummary, CalcRecipe, CalcRecipeInput, CalcMaterial } from './types'
 
-interface RawItemsIndex {
-  [namespace: string]: string[] | number | undefined
-}
-
 function defaultAmount(kind: string, interaction: { amount?: number; amountMb?: number }): number {
   if (kind === 'fluid') return interaction.amountMb ?? 0
   return interaction.amount ?? 1
@@ -118,26 +114,6 @@ function recipePathCandidates(recipeId: string): string[] {
   ]
 }
 
-export function useItemsCatalog(bundleId: string): string[] {
-  return useQuery({
-    queryKey: ['items-catalog', bundleId],
-    enabled: Boolean(bundleId),
-    queryFn: async () => {
-      const raw = await fetchJson<RawItemsIndex>(`${bundleBaseUrl(bundleId)}items/index.json`, {})
-      const ids = new Set<string>()
-      for (const [namespace, paths] of Object.entries(raw)) {
-        if (namespace === 'schema' || !Array.isArray(paths)) continue
-        for (const p of paths) {
-          if (typeof p !== 'string' || !p) continue
-          ids.add(p.includes(':') ? p : `${namespace}:${p}`)
-        }
-      }
-      return Array.from(ids).sort()
-    },
-    staleTime: Infinity,
-  }).data ?? []
-}
-
 export async function loadItemOutputs(bundleId: string, itemId: string): Promise<Record<string, string[]>> {
   const idx = itemId.indexOf(':')
   if (idx <= 0 || idx >= itemId.length - 1) return {}
@@ -246,33 +222,77 @@ export function useRecipeMetas(
   })
 }
 
+const CONCURRENCY = 8
+
+async function fetchRecipeMeta(
+  bundleId: string,
+  itemId: string,
+  recipeId: string,
+): Promise<{ summary: CalcRecipeSummary | null; bytes: number }> {
+  const candidates = recipePathCandidates(recipeId)
+  for (const relPath of candidates) {
+    const url = `${bundleBaseUrl(bundleId)}${relPath}`
+    try {
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const ct = String(res.headers.get('content-type') || '').toLowerCase()
+      if (!ct.includes('application/json')) continue
+      const text = await res.text()
+      const bytes = new TextEncoder().encode(text).length
+      const meta: RecipeMetaData | null = JSON.parse(text)
+      if (!meta || !meta.id) continue
+      const recipe = parseMetaToRecipe(meta, itemId)
+      if (!recipe) continue
+      return {
+        summary: {
+          recipeId: recipe.recipeId,
+          category: recipe.category,
+          outputAmount: recipe.targetOutputAmount,
+        },
+        bytes,
+      }
+    } catch {
+      continue
+    }
+    break
+  }
+  return { summary: null, bytes: 0 }
+}
+
 export function useRecipeMetasByIds(
   bundleId: string,
   itemId: string,
   recipeIds: string[],
+  onProgress?: (loaded: number, total: number, bytes: number) => void,
 ) {
   return useQuery({
     queryKey: ['recipe-metas-by-ids', bundleId, itemId, recipeIds],
     enabled: Boolean(bundleId) && recipeIds.length > 0,
     queryFn: async (): Promise<CalcRecipeSummary[]> => {
-      const result: CalcRecipeSummary[] = []
-      for (const recipeId of recipeIds) {
-        const candidates = recipePathCandidates(recipeId)
-        for (const relPath of candidates) {
-          const url = `${bundleBaseUrl(bundleId)}${relPath}`
-          const meta = await fetchJson<RecipeMetaData | null>(url, null)
-          if (!meta || !meta.id) continue
-          const recipe = parseMetaToRecipe(meta, itemId)
-          if (!recipe) continue
-          result.push({
-            recipeId: recipe.recipeId,
-            category: recipe.category,
-            outputAmount: recipe.targetOutputAmount,
-          })
-          break
+      const results: CalcRecipeSummary[] = []
+      let loaded = 0
+      let cumBytes = 0
+      const total = recipeIds.length
+      const queue = [...recipeIds]
+
+      async function worker() {
+        while (queue.length > 0) {
+          const recipeId = queue.shift()!
+          const { summary, bytes } = await fetchRecipeMeta(bundleId, itemId, recipeId)
+          if (summary) results.push(summary)
+          cumBytes += bytes
+          loaded++
+          onProgress?.(loaded, total, cumBytes)
         }
       }
-      return result
+
+      const poolSize = Math.min(CONCURRENCY, total)
+      if (poolSize > 0) {
+        const workers = Array.from({ length: poolSize }, () => worker())
+        await Promise.all(workers)
+      }
+
+      return results
     },
   })
 }

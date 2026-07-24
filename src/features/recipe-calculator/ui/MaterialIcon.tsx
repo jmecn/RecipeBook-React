@@ -1,4 +1,5 @@
-import { getEmiRendererClient } from '../../../adapters/emi-renderer/client'
+import { useEffect, useRef } from 'react'
+import { getEmiRendererClient, type IconMountSession } from '../../../adapters/emi-renderer/client'
 
 interface MaterialIconProps {
   itemId: string
@@ -15,21 +16,27 @@ export function MaterialIcon({
   locale,
   className = 'calc-tree-icon',
 }: MaterialIconProps) {
-  const client = getEmiRendererClient()
+  const hostRef = useRef<HTMLSpanElement | null>(null)
+  const sessionRef = useRef<IconMountSession | null>(null)
 
-  return (
-    <span
-      className={className}
-      ref={(el) => {
-        if (!el || !bundleId) return
-        if (el.children.length > 0) return
-        client.mountItemIcon(el, {
-          itemId,
-          baseUrl,
-          locale,
-          fallbackText: itemId.slice(0, 4),
-        })
-      }}
-    />
-  )
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host || !bundleId) return
+
+    const client = getEmiRendererClient()
+    const session = client.mountItemIcon(host, {
+      itemId,
+      baseUrl,
+      locale,
+      fallbackText: itemId.slice(0, 4),
+    })
+    sessionRef.current = session
+
+    return () => {
+      session.disconnect()
+      sessionRef.current = null
+    }
+  }, [itemId, bundleId, baseUrl, locale])
+
+  return <span ref={hostRef} className={className} />
 }

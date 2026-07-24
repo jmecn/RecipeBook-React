@@ -42,11 +42,8 @@ export function useCalculatorState(): {
   addTarget: (itemId: string, amount?: number) => void
   removeTarget: (index: number) => void
   setTargetAmount: (index: number, amount: number) => void
-  setAmount: (amount: number) => void
-  setItem: (itemId: string) => void
   setSelection: (materialId: string, recipeId: string | null) => void
   toggleCollapsed: (materialId: string) => void
-  clearSelections: () => void
   clearAll: () => void
   importState: (newState: CalculatorState) => void
   tagItemSelections: Record<string, string>
@@ -163,38 +160,6 @@ export function useCalculatorState(): {
     }, 300)
   }, [decoded, pushState])
 
-  const setAmount = useCallback((amount: number) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    const safe = Math.max(1, Math.floor(amount) || 1)
-    debounceRef.current = setTimeout(() => {
-      const next = {
-        ...decoded,
-        targets: decoded.targets.length > 0
-          ? [{ ...decoded.targets[0], amount: safe }, ...decoded.targets.slice(1)]
-          : [{ itemId: '', amount: safe }],
-      }
-      pushState(next)
-    }, 300)
-  }, [decoded, pushState])
-
-  const setItem = useCallback((itemId: string) => {
-    const existingIndex = decoded.targets.findIndex(t => t.itemId === itemId)
-    if (existingIndex >= 0) {
-      const next = {
-        ...decoded,
-        targets: decoded.targets.map((t, i) =>
-          i === existingIndex ? { ...t, amount: t.amount + 1 } : t
-        ),
-      }
-      pushState(next)
-    } else {
-      pushState({
-        ...decoded,
-        targets: [...decoded.targets, { itemId, amount: 1 }],
-      })
-    }
-  }, [decoded, pushState])
-
   const setSelection = useCallback((materialId: string, recipeId: string | null) => {
     const currentState = decoded
     const nextSelections = { ...currentState.selections }
@@ -222,11 +187,6 @@ export function useCalculatorState(): {
     pushState({ ...decoded, collapsed: nextCollapsed })
   }, [decoded, pushState, syncPrefs])
 
-  const clearSelections = useCallback(() => {
-    syncPrefs({}, decoded.collapsed)
-    pushState({ ...decoded, selections: {} })
-  }, [decoded, pushState, syncPrefs])
-
   const clearAll = useCallback(() => {
     syncPrefs({}, {})
     pushState(createEmptyState())
@@ -249,11 +209,8 @@ export function useCalculatorState(): {
     addTarget,
     removeTarget,
     setTargetAmount,
-    setAmount,
-    setItem,
     setSelection,
     toggleCollapsed,
-    clearSelections,
     clearAll,
     importState,
     tagItemSelections: tagItemSelections,

@@ -2,13 +2,28 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../../shared/i18n/useI18n';
 import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
+import { ScrollableTabBar } from '../../../shared/ui/ScrollableTabBar';
 import { useItemOutputs, useRecipeMetasByIds } from '../model/queries';
 import { createRecipeCardElement } from '../../item-detail/lib/recipe-grid-dom';
 import { getEmiRendererClient, type IconMountSession } from '../../../adapters/emi-renderer/client';
-import { getActiveTheme } from '../../../shared/lib/theme';
 import type { CategoriesManifest } from '../../item-detail/lib/recipe-meta';
 
 const EXCLUDED_CATEGORIES = new Set(['create:automatic_shaped']);
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatSpeed(bytes: number, startMs: number): string {
+  const elapsed = (Date.now() - startMs) / 1000
+  if (elapsed <= 0) return ''
+  const bps = bytes / elapsed
+  if (bps < 1024) return `${bps.toFixed(0)} B/s`
+  if (bps < 1024 * 1024) return `${(bps / 1024).toFixed(1)} KB/s`
+  return `${(bps / (1024 * 1024)).toFixed(1)} MB/s`
+}
 
 interface RecipeSelectModalProps {
   isOpen: boolean;
@@ -140,23 +155,22 @@ export function RecipeSelectModal({
     return categoryMap.get(activeCategory) ?? [];
   }, [categoryMap, activeCategory]);
 
-  const recipeMetasQuery = useRecipeMetasByIds(bundleId, selectingFor, activeRecipeIds);
+  const recipeMetasQuery = useRecipeMetasByIds(bundleId, selectingFor, activeRecipeIds, (loaded, total, bytes) => {
+    onProgressRef.current({ loaded, total, bytes });
+  });
   const isLoadingRecipes = recipeMetasQuery.isLoading;
+
+  useEffect(() => {
+    loadStartRef.current = Date.now();
+    setLoadProgress({ loaded: 0, total: activeRecipeIds.length, bytes: 0 });
+  }, [activeRecipeIds]);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const mountSessionRef = useRef<IconMountSession | null>(null);
-
-  useEffect(() => {
-    if (!baseUrl) return;
-    void client.configure({
-      baseUrl,
-      locale,
-      theme: getActiveTheme(),
-      registryLabels: langLabels,
-      onItemClick: () => {},
-      onTagClick: () => {},
-    });
-  }, [baseUrl, client, langLabels, locale]);
+  const [loadProgress, setLoadProgress] = useState({ loaded: 0, total: 0, bytes: 0 });
+  const loadStartRef = useRef(0);
+  const onProgressRef = useRef(setLoadProgress);
+  onProgressRef.current = setLoadProgress;
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -212,7 +226,7 @@ export function RecipeSelectModal({
         </div>
 
         {categories.length > 0 && (
-          <div className="modal-tabs calc-recipe-tabs">
+          <ScrollableTabBar className="modal-tabs calc-recipe-tabs">
             {categories.map((c) => {
               const count = categoryMap.get(c)?.length ?? 0;
               return (
@@ -228,24 +242,36 @@ export function RecipeSelectModal({
                 />
               );
             })}
-          </div>
+          </ScrollableTabBar>
         )}
 
         <div className="modal-body calc-recipe-body">
-          {isLoadingCategories ? (
-            <div className="calc-recipe-loading">
-              <span className="calc-spinner" />
-              <span>{t('loading')}</span>
-            </div>
-          ) : isLoadingRecipes ? (
-            <div className="calc-recipe-loading">
-              <span className="calc-spinner" />
-              <span>{t('loading')}</span>
-            </div>
-          ) : filtered.length === 0 ? (
+          {filtered.length === 0 && !isLoadingCategories && !isLoadingRecipes ? (
             <div className="calc-recipe-empty">{t('recipeSelectNoRecipes')}</div>
           ) : (
             <div ref={gridRef} className="recipe-grid recipe-grid-compact" />
+          )}
+          {(isLoadingCategories || isLoadingRecipes) && (
+            <div className="calc-recipe-loading-overlay">
+              <div className="calc-recipe-loading">
+                <span className="calc-spinner" />
+                {isLoadingRecipes && loadProgress.total > 0 ? (
+                  <span>
+                    {t('loading')} ({loadProgress.loaded}/{loadProgress.total})
+                    {' \u2022 '}
+                    {formatBytes(loadProgress.bytes)}
+                    {loadProgress.loaded > 0 && (
+                      <>
+                        {' \u2022 '}
+                        {formatSpeed(loadProgress.bytes, loadStartRef.current)}
+                      </>
+                    )}
+                  </span>
+                ) : (
+                  <span>{t('loading')}</span>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>

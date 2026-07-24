@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react'
 import { useI18n } from '../../../shared/i18n/useI18n'
+import { Modal } from '../../../shared/ui/Modal'
 import { encodeCalcState } from '../../../shared/lib/calc-base64'
 import type { CalculatorState } from '../model/types'
 
@@ -28,28 +29,18 @@ export function ExportModal({ isOpen, onClose, currentState }: ExportModalProps)
     }
   }, [exportUrl])
 
-  if (!isOpen) return null
-
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content calc-select-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{t('importExportExport')}</h3>
-          <button type="button" className="modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="modal-body">
-          <textarea
-            ref={textRef}
-            className="export-textarea"
-            readOnly
-            value={exportUrl}
-            rows={10}
-          />
-          <button type="button" className="export-copy-btn" onClick={handleCopy}>
-            {t('importExportCopy')}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('importExportExport')}>
+      <textarea
+        ref={textRef}
+        className="export-textarea"
+        readOnly
+        value={exportUrl}
+        rows={10}
+      />
+      <button type="button" className="export-copy-btn" onClick={handleCopy}>
+        {t('importExportCopy')}
+      </button>
+    </Modal>
   )
 }

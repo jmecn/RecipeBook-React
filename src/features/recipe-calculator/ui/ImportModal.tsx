@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useI18n } from '../../../shared/i18n/useI18n'
+import { Modal } from '../../../shared/ui/Modal'
 import { decodeCalcState } from '../../../shared/lib/calc-base64'
 import type { CalculatorState } from '../model/types'
 
@@ -25,10 +26,15 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     let state: CalculatorState | null = null
 
     if (trimmed.includes('?calc=')) {
-      const url = new URL(trimmed)
-      const calc = url.searchParams.get('calc')
-      if (calc) {
-        state = decodeCalcState(calc)
+      try {
+        const url = new URL(trimmed)
+        const calc = url.searchParams.get('calc')
+        if (calc) {
+          state = decodeCalcState(calc)
+        }
+      } catch {
+        setError(t('importExportInvalid'))
+        return
       }
     } else {
       state = decodeCalcState(trimmed)
@@ -44,29 +50,19 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     onClose()
   }, [importText, onImport, onClose, t])
 
-  if (!isOpen) return null
-
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content calc-select-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h3>{t('importExportImport')}</h3>
-          <button type="button" className="modal-close" onClick={onClose}>×</button>
-        </div>
-        <div className="modal-body">
-          <textarea
-            className="import-textarea"
-            value={importText}
-            onChange={(e) => setImportText(e.target.value)}
-            placeholder={t('importExportPlaceholder')}
-            rows={10}
-          />
-          {error && <div className="import-error">{error}</div>}
-          <button type="button" className="import-submit-btn" onClick={handleImport}>
-            {t('importExportImportButton')}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Modal isOpen={isOpen} onClose={onClose} title={t('importExportImport')}>
+      <textarea
+        className="import-textarea"
+        value={importText}
+        onChange={(e) => setImportText(e.target.value)}
+        placeholder={t('importExportPlaceholder')}
+        rows={10}
+      />
+      {error && <div className="import-error">{error}</div>}
+      <button type="button" className="import-submit-btn" onClick={handleImport}>
+        {t('importExportImportButton')}
+      </button>
+    </Modal>
   )
 }
