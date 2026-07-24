@@ -21,6 +21,19 @@ export function mergeAmounts(list: CalcMaterial[]): CalcMaterial[] {
   return Array.from(map.values())
 }
 
+export function deduplicateMaterials(list: CalcMaterial[]): CalcMaterial[] {
+  const seen = new Set<string>()
+  const result: CalcMaterial[] = []
+  for (const m of list) {
+    const key = `${m.kind}:${m.id}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      result.push({ ...m })
+    }
+  }
+  return result
+}
+
 export interface BuildTreeInput {
   materialId: string
   kind: 'item' | 'fluid'
@@ -168,7 +181,7 @@ export function buildTree(
     multiplier,
     children,
     byproducts: mergeAmounts(byproducts),
-    catalysts: mergeAmounts(catalysts),
+    catalysts: deduplicateMaterials(catalysts),
     availableRecipes,
     depth,
     tagId,
@@ -207,7 +220,7 @@ export function flattenTree(node: CalcNode): {
   return {
     rawMaterials: mergeAmounts(rawMaterials),
     byproducts: mergeAmounts(allByproducts),
-    catalysts: mergeAmounts(allCatalysts),
+    catalysts: deduplicateMaterials(allCatalysts),
   }
 }
 
@@ -229,40 +242,4 @@ export function countTreeStats(node: CalcNode): { recipeCount: number; maxDepth:
 
 export function createEmptyState(): CalculatorState {
   return { targets: [], selections: {}, collapsed: {} }
-}
-
-export function flattenTrees(nodes: CalcNode[]): {
-  rawMaterials: CalcMaterial[]
-  byproducts: CalcMaterial[]
-  catalysts: CalcMaterial[]
-} {
-  const allRaw: CalcMaterial[] = []
-  const allByproducts: CalcMaterial[] = []
-  const allCatalysts: CalcMaterial[] = []
-
-  for (const node of nodes) {
-    const { rawMaterials, byproducts, catalysts } = flattenTree(node)
-    allRaw.push(...rawMaterials)
-    allByproducts.push(...byproducts)
-    allCatalysts.push(...catalysts)
-  }
-
-  return {
-    rawMaterials: mergeAmounts(allRaw),
-    byproducts: mergeAmounts(allByproducts),
-    catalysts: mergeAmounts(allCatalysts),
-  }
-}
-
-export function countTreesStats(nodes: CalcNode[]): { recipeCount: number; maxDepth: number } {
-  let recipeCount = 0
-  let maxDepth = 0
-
-  for (const node of nodes) {
-    const stats = countTreeStats(node)
-    recipeCount += stats.recipeCount
-    if (stats.maxDepth > maxDepth) maxDepth = stats.maxDepth
-  }
-
-  return { recipeCount, maxDepth }
 }

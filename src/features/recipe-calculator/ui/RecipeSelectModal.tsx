@@ -196,7 +196,6 @@ export function RecipeSelectModal({
     for (const recipe of filtered) {
       const card = createRecipeCardElement(recipe.recipeId, null, { showId: false });
       card.addEventListener('click', () => onSelect(recipe.recipeId));
-      card.style.cursor = 'pointer';
       host.appendChild(card);
     }
 

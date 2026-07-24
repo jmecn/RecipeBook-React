@@ -64,6 +64,9 @@
   "calcNoTargets": "在上方添加物品开始计算",
   "calcRemoveTarget": "移除目标",
   "calcAddTarget": "添加为目标",
+  "calcClearRecipe": "清除配方",
+  "calcSelectTag": "选择标签物品",
+  "calcResetTag": "重置为默认",
   "importExportTitle": "导入/导出",
   "importExportExport": "导出",
   "importExportImport": "导入",
@@ -79,5 +82,6 @@
   "materialSummaryTitle": "材料清单",
   "materialSummaryMerged": "合并",
   "materialSummaryByTarget": "按目标",
-  "materialSummaryByproducts": "副产品"
+  "materialSummaryByproducts": "副产品",
+  "materialSummaryCatalysts": "不消耗"
 }

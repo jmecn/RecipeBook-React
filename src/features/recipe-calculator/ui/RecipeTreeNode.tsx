@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { CalcNode } from '../model/types'
+import { useI18n } from '../../../shared/i18n/useI18n'
 import { MaterialIcon } from './MaterialIcon'
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel'
 import { formatMaterialAmount, resolveLabel } from '../lib/utils'
@@ -36,6 +37,7 @@ export function RecipeTreeNode({
   onSelectTag,
   onClearTagSelection,
 }: RecipeTreeNodeProps) {
+  const { t } = useI18n();
   const hasRecipe = node.recipe !== null
   const hasAvailableRecipes = node.availableRecipes.length > 0
   const isRoot = node.depth === 0
@@ -61,18 +63,24 @@ export function RecipeTreeNode({
     }
   }, [hasRecipe, node.materialId, onCollapse, onSelectRecipe])
 
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const handleMouseEnter = useCallback((e: React.MouseEvent) => {
     if (!hasRecipe) return
-    setShowTooltip(true)
     setTooltipPos({ x: e.clientX + 16, y: e.clientY + 16 })
+    hoverTimerRef.current = setTimeout(() => setShowTooltip(true), 200)
   }, [hasRecipe])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!showTooltip) return
+    if (!hasRecipe) return
     setTooltipPos({ x: e.clientX + 16, y: e.clientY + 16 })
-  }, [showTooltip])
+  }, [hasRecipe])
 
   const handleMouseLeave = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current)
+      hoverTimerRef.current = null
+    }
     setShowTooltip(false)
   }, [])
 
@@ -115,7 +123,7 @@ export function RecipeTreeNode({
               <button
                 type="button"
                 className="calc-tree-clear-btn"
-                title="Reset to default"
+                title={t('calcResetTag')}
                 onClick={(e) => {
                   e.stopPropagation()
                   onClearTagSelection(node.tagId!)
@@ -127,7 +135,7 @@ export function RecipeTreeNode({
             <button
               type="button"
               className="calc-tree-select-btn"
-              title="Select tag item"
+              title={t('calcSelectTag')}
               onClick={(e) => {
                 e.stopPropagation()
                 onSelectTag(node.tagId!, e.currentTarget)
@@ -144,7 +152,7 @@ export function RecipeTreeNode({
           <button
             type="button"
             className="calc-tree-clear-btn"
-            title="Clear recipe selection"
+            title={t('calcClearRecipe')}
             onClick={(e) => {
               e.stopPropagation()
               onClearSelection(node.materialId)
@@ -152,11 +160,6 @@ export function RecipeTreeNode({
           >
             &times;
           </button>
-        )}
-        {!hasRecipe && hasAvailableRecipes && (
-          <span className="calc-tree-recipes-badge">
-            [{node.availableRecipes.length} recipes]
-          </span>
         )}
       </div>
       {showChildren && node.children.length > 0 && (

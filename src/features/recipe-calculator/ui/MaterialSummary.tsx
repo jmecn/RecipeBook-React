@@ -9,6 +9,7 @@ import { formatMaterialAmount, resolveLabel } from '../lib/utils'
 interface MaterialSummaryProps {
   rawMaterials: CalcMaterial[]
   byproducts: CalcMaterial[]
+  catalysts: CalcMaterial[]
   langLabels: Record<string, string>
   bundleId: string
   baseUrl: string
@@ -129,6 +130,18 @@ function TargetGroup({
             />
           </div>
         )}
+        {summary.catalysts.length > 0 && (
+          <div className="calc-material-group">
+            <div className="calc-material-group-title">{t('materialSummaryCatalysts')}</div>
+            <MaterialGrid
+              materials={summary.catalysts}
+              langLabels={langLabels}
+              bundleId={bundleId}
+              baseUrl={baseUrl}
+              locale={locale}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -137,6 +150,7 @@ function TargetGroup({
 export function MaterialSummary({
   rawMaterials,
   byproducts,
+  catalysts,
   langLabels,
   bundleId,
   baseUrl,
@@ -187,6 +201,18 @@ export function MaterialSummary({
               <div className="calc-material-group-title">{t('materialSummaryByproducts')}</div>
               <MaterialGrid
                 materials={byproducts}
+                langLabels={langLabels}
+                bundleId={bundleId}
+                baseUrl={baseUrl}
+                locale={locale}
+              />
+            </div>
+          )}
+          {catalysts.length > 0 && (
+            <div className="calc-material-group">
+              <div className="calc-material-group-title">{t('materialSummaryCatalysts')}</div>
+              <MaterialGrid
+                materials={catalysts}
                 langLabels={langLabels}
                 bundleId={bundleId}
                 baseUrl={baseUrl}

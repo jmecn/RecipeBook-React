@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useI18n } from '../../../shared/i18n/useI18n';
 import { useItemOutputs, useAllRecipeOutputs, useRecipeMetas } from '../model/queries';
 import { MaterialIcon } from './MaterialIcon';
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel';
@@ -58,6 +59,7 @@ export function CalcTargetTree({
   onAmountChange,
   onSummaryReady,
 }: CalcTargetTreeProps) {
+  const { t } = useI18n();
   const itemOutputsQuery = useItemOutputs(bundleId, target.itemId);
   const recipeOutputsQuery = useAllRecipeOutputs(bundleId, target.itemId, itemOutputsQuery.data);
 
@@ -144,7 +146,7 @@ export function CalcTargetTree({
           <button
             type="button"
             className="calc-tree-column-remove"
-            title="Remove target"
+            title={t('calcRemoveTarget')}
             onClick={() => onRemoveTarget(index)}
           >
             ×
@@ -184,5 +186,5 @@ export function CalcTargetTree({
     );
   }
 
-  return <p className="app-empty">Loading...</p>;
+  return <p className="app-empty">{t('loading')}</p>;
 }

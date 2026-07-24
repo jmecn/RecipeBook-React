@@ -759,15 +759,6 @@
   color: var(--muted);
 }
 
-.calc-tree-recipes-badge {
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
-  padding: 1px 6px;
-  border-radius: 4px;
-}
-
 .calc-tree-clear-btn {
   flex-shrink: 0;
   width: 18px;
@@ -1212,13 +1203,14 @@
   padding: 8px 0;
 }
 
-.calc-recipe-body .recipe-grid-compact .emi-recipe {
-  border-radius: 6px;
+.calc-recipe-body .recipe-grid-compact .recipe-card {
+  cursor: pointer;
   border: 1px solid var(--border);
+  border-radius: 6px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.calc-recipe-body .recipe-grid-compact .emi-recipe:hover {
+.calc-recipe-body .recipe-grid-compact .recipe-card:hover {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent);
 }

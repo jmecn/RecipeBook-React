@@ -4,6 +4,8 @@ import { bundleBaseUrl, fetchJson } from '../../../shared/api/http'
 import { recipePathCandidates } from '../../../shared/lib/bundle'
 import type { RecipeMetaData, CalcRecipeSummary, CalcRecipe, CalcRecipeInput, CalcMaterial } from './types'
 
+const EXCLUDED_CATEGORIES = new Set(['create:automatic_shaped'])
+
 function defaultAmount(kind: string, interaction: { amount?: number; amountMb?: number }): number {
   if (kind === 'fluid') return interaction.amountMb ?? 0
   return interaction.amount ?? 1
@@ -143,22 +145,33 @@ export function useAllRecipeOutputs(
     enabled: Boolean(bundleId) && allRecipeIds.length > 0,
     queryFn: async (): Promise<Map<string, CalcRecipeSummary[]>> => {
       const metaMap = new Map<string, CalcRecipeSummary>()
+      const queue = [...allRecipeIds]
 
-      for (const recipeId of allRecipeIds) {
-        const candidates = recipePathCandidates(recipeId)
-        for (const relPath of candidates) {
-          const url = `${bundleBaseUrl(bundleId)}${relPath}`
-          const meta = await fetchJson<RecipeMetaData | null>(url, null)
-          if (!meta || !meta.id) continue
-          const recipe = parseMetaToRecipe(meta, itemId)
-          if (!recipe) continue
-          metaMap.set(recipeId, {
-            recipeId: recipe.recipeId,
-            category: recipe.category,
-            outputAmount: recipe.targetOutputAmount,
-          })
-          break
+      async function worker() {
+        while (queue.length > 0) {
+          const recipeId = queue.shift()!
+          const candidates = recipePathCandidates(recipeId)
+          for (const relPath of candidates) {
+            const url = `${bundleBaseUrl(bundleId)}${relPath}`
+            const meta = await fetchJson<RecipeMetaData | null>(url, null)
+            if (!meta || !meta.id) continue
+            const recipe = parseMetaToRecipe(meta, itemId)
+            if (!recipe) continue
+            if (EXCLUDED_CATEGORIES.has(recipe.category)) continue
+            metaMap.set(recipeId, {
+              recipeId: recipe.recipeId,
+              category: recipe.category,
+              outputAmount: recipe.targetOutputAmount,
+            })
+            break
+          }
         }
+      }
+
+      const poolSize = Math.min(CONCURRENCY, allRecipeIds.length)
+      if (poolSize > 0) {
+        const workers = Array.from({ length: poolSize }, () => worker())
+        await Promise.all(workers)
       }
 
       const byItem = new Map<string, CalcRecipeSummary[]>()
@@ -172,6 +185,8 @@ export function useAllRecipeOutputs(
     },
   })
 }
+
+const recipeMetaCache = new Map<string, CalcRecipe>()
 
 export function useRecipeMetas(
   bundleId: string,
@@ -187,23 +202,45 @@ export function useRecipeMetas(
     enabled: Boolean(bundleId) && recipeIds.length > 0,
     queryFn: async (): Promise<Map<string, CalcRecipe>> => {
       const result = new Map<string, CalcRecipe>()
+      const needFetch: string[] = []
 
       for (const recipeId of recipeIds) {
-        const candidates = recipePathCandidates(recipeId)
-        const selectionMap = new Map(Object.entries(selections))
-        const targetItemId = Array.from(selectionMap.entries())
-          .find(([, rId]) => rId === recipeId)?.[0] ?? ''
-
-        for (const relPath of candidates) {
-          const url = `${bundleBaseUrl(bundleId)}${relPath}`
-          const meta = await fetchJson<RecipeMetaData | null>(url, null)
-          if (!meta || !meta.id) continue
-          const recipe = parseMetaToRecipe(meta, targetItemId)
-          if (recipe) {
-            result.set(recipeId, recipe)
-          }
-          break
+        const key = `${bundleId}:${recipeId}`
+        const cached = recipeMetaCache.get(key)
+        if (cached) {
+          result.set(recipeId, cached)
+        } else {
+          needFetch.push(recipeId)
         }
+      }
+
+      if (needFetch.length > 0) {
+        const queue = [...needFetch]
+        const selectionMap = new Map(Object.entries(selections))
+
+        async function worker() {
+          while (queue.length > 0) {
+            const recipeId = queue.shift()!
+            const targetItemId = Array.from(selectionMap.entries())
+              .find(([, rId]) => rId === recipeId)?.[0] ?? ''
+            const candidates = recipePathCandidates(recipeId)
+            for (const relPath of candidates) {
+              const url = `${bundleBaseUrl(bundleId)}${relPath}`
+              const meta = await fetchJson<RecipeMetaData | null>(url, null)
+              if (!meta || !meta.id) continue
+              const recipe = parseMetaToRecipe(meta, targetItemId)
+              if (recipe) {
+                recipeMetaCache.set(`${bundleId}:${recipeId}`, recipe)
+                result.set(recipeId, recipe)
+              }
+              break
+            }
+          }
+        }
+
+        const poolSize = Math.min(CONCURRENCY, needFetch.length)
+        const workers = Array.from({ length: poolSize }, () => worker())
+        await Promise.all(workers)
       }
 
       return result

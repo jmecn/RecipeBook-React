@@ -38,18 +38,15 @@ function mergeSelections(
 
 export function useCalculatorState(): {
   state: CalculatorState
-  setState: (state: CalculatorState) => void
   addTarget: (itemId: string, amount?: number) => void
   removeTarget: (index: number) => void
   setTargetAmount: (index: number, amount: number) => void
   setSelection: (materialId: string, recipeId: string | null) => void
   toggleCollapsed: (materialId: string) => void
-  clearAll: () => void
   importState: (newState: CalculatorState) => void
   tagItemSelections: Record<string, string>
   tagFluidSelections: Record<string, string>
   setTagItemSelection: (tagId: string, itemId: string | null) => void
-  setTagFluidSelection: (tagId: string, fluidId: string | null) => void
 } {
   const navigate = useNavigate()
   const route = useAppRoute()
@@ -58,7 +55,7 @@ export function useCalculatorState(): {
   const [tagItemSelections, setTagItemSelectionsState] = useState<Record<string, string>>(
     () => loadJson(TAG_ITEM_KEY, {}),
   )
-  const [tagFluidSelections, setTagFluidSelectionsState] = useState<Record<string, string>>(
+  const [tagFluidSelections] = useState<Record<string, string>>(
     () => loadJson(TAG_FLUID_KEY, {}),
   )
 
@@ -71,19 +68,6 @@ export function useCalculatorState(): {
         delete next[tagId]
       }
       saveJson(TAG_ITEM_KEY, next)
-      return next
-    })
-  }, [])
-
-  const setTagFluidSelection = useCallback((tagId: string, fluidId: string | null) => {
-    setTagFluidSelectionsState(prev => {
-      const next = { ...prev }
-      if (fluidId) {
-        next[tagId] = fluidId
-      } else {
-        delete next[tagId]
-      }
-      saveJson(TAG_FLUID_KEY, next)
       return next
     })
   }, [])
@@ -126,11 +110,6 @@ export function useCalculatorState(): {
     saveJson(SELECTIONS_KEY, selections)
     saveJson(COLLAPSED_KEY, collapsed)
   }, [])
-
-  const setState = useCallback((newState: CalculatorState) => {
-    syncPrefs(newState.selections, newState.collapsed)
-    pushState(newState)
-  }, [pushState, syncPrefs])
 
   const addTarget = useCallback((itemId: string, amount: number = 1) => {
     const next = {
@@ -187,11 +166,6 @@ export function useCalculatorState(): {
     pushState({ ...decoded, collapsed: nextCollapsed })
   }, [decoded, pushState, syncPrefs])
 
-  const clearAll = useCallback(() => {
-    syncPrefs({}, {})
-    pushState(createEmptyState())
-  }, [pushState, syncPrefs])
-
   const importState = useCallback((newState: CalculatorState) => {
     syncPrefs(newState.selections, newState.collapsed)
     pushState(newState)
@@ -205,17 +179,14 @@ export function useCalculatorState(): {
 
   return {
     state: decoded,
-    setState,
     addTarget,
     removeTarget,
     setTargetAmount,
     setSelection,
     toggleCollapsed,
-    clearAll,
     importState,
     tagItemSelections: tagItemSelections,
     tagFluidSelections: tagFluidSelections,
     setTagItemSelection: setTagItemSelection,
-    setTagFluidSelection: setTagFluidSelection,
   }
 }

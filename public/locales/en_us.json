@@ -66,6 +66,9 @@
   "calcNoTargets": "Add items above to start calculating",
   "calcRemoveTarget": "Remove target",
   "calcAddTarget": "Add as target",
+  "calcClearRecipe": "Clear recipe",
+  "calcSelectTag": "Pick tag item",
+  "calcResetTag": "Reset to default",
   "importExportTitle": "Import/Export",
   "importExportExport": "Export",
   "importExportImport": "Import",
@@ -81,5 +84,6 @@
   "materialSummaryTitle": "Materials",
   "materialSummaryMerged": "Merged",
   "materialSummaryByTarget": "By Target",
-  "materialSummaryByproducts": "Byproducts"
+  "materialSummaryByproducts": "Byproducts",
+  "materialSummaryCatalysts": "Not Consumed"
 }

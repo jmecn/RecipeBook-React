@@ -8,7 +8,7 @@ import { useItemsLangQuery } from '../../item-list/model/items-lang';
 import { useItemsCatalogQuery } from '../../item-list/model/queries';
 import { useCategoriesManifestQuery } from '../../item-detail/model/categories';
 import { filterItemIds } from '../../../shared/lib/item-labels';
-import { mergeAmounts } from '../lib/calculator-engine';
+import { mergeAmounts, deduplicateMaterials } from '../lib/calculator-engine';
 import type { CalcMaterial } from '../model/types';
 import { useCalculatorState } from '../hooks/useCalculatorState';
 import { MaterialSummary } from './MaterialSummary';
@@ -51,22 +51,31 @@ export function RecipeCalculatorPage() {
   const [targetSummaries, setTargetSummaries] = useState<Map<number, CalcTargetSummary>>(new Map());
 
   const itemsQuery = useItemsCatalogQuery(bundleId);
-  const items = Array.isArray(itemsQuery.data) ? itemsQuery.data : [];
+  const items = useMemo<string[]>(
+    () => Array.isArray(itemsQuery.data) ? itemsQuery.data : [],
+    [itemsQuery.data],
+  );
   const langQuery = useItemsLangQuery(bundleId, locale, items, itemsQuery.isSuccess);
-  const langLabels: Record<string, string> = langQuery.data?.labels ?? {};
+  const langLabels = useMemo<Record<string, string>>(
+    () => langQuery.data?.labels ?? {},
+    [langQuery.data?.labels],
+  );
   const categoriesQuery = useCategoriesManifestQuery(bundleId);
   const manifest = categoriesQuery.data ?? null;
 
-  const { rawMaterials, byproducts } = useMemo(() => {
+  const { rawMaterials, byproducts, catalysts } = useMemo(() => {
     const allRaw: CalcMaterial[] = [];
     const allByproducts: CalcMaterial[] = [];
+    const allCatalysts: CalcMaterial[] = [];
     targetSummaries.forEach(s => {
       allRaw.push(...s.rawMaterials);
       allByproducts.push(...s.byproducts);
+      allCatalysts.push(...s.catalysts);
     });
     return {
       rawMaterials: mergeAmounts(allRaw),
       byproducts: mergeAmounts(allByproducts),
+      catalysts: deduplicateMaterials(allCatalysts),
     };
   }, [targetSummaries]);
 
@@ -291,6 +300,7 @@ export function RecipeCalculatorPage() {
             <MaterialSummary
               rawMaterials={rawMaterials}
               byproducts={byproducts}
+              catalysts={catalysts}
               langLabels={langLabels}
               bundleId={bundleId}
               baseUrl={baseUrl}
