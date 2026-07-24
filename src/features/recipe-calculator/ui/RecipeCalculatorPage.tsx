@@ -69,7 +69,19 @@ export function RecipeCalculatorPage() {
     };
   }, [targetSummaries]);
 
-
+  useEffect(() => {
+    setTargetSummaries(prev => {
+      let changed = false
+      for (const key of prev.keys()) {
+        if (key >= targets.length) {
+          if (!changed) prev = new Map(prev)
+          prev.delete(key)
+          changed = true
+        }
+      }
+      return prev
+    })
+  }, [targets])
 
   const handleSelectRecipe = useCallback((materialId: string) => {
     setSelectingFor(materialId);

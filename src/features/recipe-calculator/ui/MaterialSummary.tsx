@@ -91,6 +91,7 @@ function TargetGroup({
   baseUrl: string
   locale: string
 }) {
+  const { t } = useI18n()
   const label = resolveLabel(langLabels, summary.targetItemId)
   const amount = formatMaterialAmount('item', summary.targetAmount)
   return (
@@ -118,7 +119,7 @@ function TargetGroup({
         />
         {summary.byproducts.length > 0 && (
           <div className="calc-material-group">
-            <div className="calc-material-group-title">Byproducts</div>
+            <div className="calc-material-group-title">{t('materialSummaryByproducts')}</div>
             <MaterialGrid
               materials={summary.byproducts}
               langLabels={langLabels}
@@ -183,7 +184,7 @@ export function MaterialSummary({
           />
           {byproducts.length > 0 && (
             <div className="calc-material-group">
-              <div className="calc-material-group-title">Byproducts</div>
+              <div className="calc-material-group-title">{t('materialSummaryByproducts')}</div>
               <MaterialGrid
                 materials={byproducts}
                 langLabels={langLabels}

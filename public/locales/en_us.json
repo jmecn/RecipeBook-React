@@ -80,5 +80,6 @@
   "recipeSelectNoRecipes": "No recipes available",
   "materialSummaryTitle": "Materials",
   "materialSummaryMerged": "Merged",
-  "materialSummaryByTarget": "By Target"
+  "materialSummaryByTarget": "By Target",
+  "materialSummaryByproducts": "Byproducts"
 }

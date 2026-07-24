@@ -78,5 +78,6 @@
   "recipeSelectNoRecipes": "暂无可用配方",
   "materialSummaryTitle": "材料清单",
   "materialSummaryMerged": "合并",
-  "materialSummaryByTarget": "按目标"
+  "materialSummaryByTarget": "按目标",
+  "materialSummaryByproducts": "副产品"
 }
