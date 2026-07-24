@@ -7,6 +7,7 @@ interface MaterialIconProps {
   baseUrl: string
   locale: string
   className?: string
+  isTag?: boolean
 }
 
 export function MaterialIcon({
@@ -15,9 +16,11 @@ export function MaterialIcon({
   baseUrl,
   locale,
   className = 'calc-tree-icon',
+  isTag = false,
 }: MaterialIconProps) {
   const hostRef = useRef<HTMLSpanElement | null>(null)
   const sessionRef = useRef<IconMountSession | null>(null)
+  const tagMarkRef = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
     const host = hostRef.current
@@ -38,5 +41,21 @@ export function MaterialIcon({
     }
   }, [itemId, bundleId, baseUrl, locale])
 
-  return <span ref={hostRef} className={className} />
+  useEffect(() => {
+    if (!isTag || !tagMarkRef.current || !baseUrl) return
+    const client = getEmiRendererClient()
+    const renderer = client.getRenderer()
+    if (!renderer) return
+    const url = renderer.resolveResourceUrl('textures/emi/textures/gui/widgets.png')
+    if (url) {
+      tagMarkRef.current.style.backgroundImage = `url("${url}")`
+    }
+  }, [isTag, baseUrl])
+
+  return (
+    <span className={`${className}${isTag ? ' is-tag-material' : ''}`}>
+      <span ref={hostRef} className="calc-tree-icon-inner" />
+      {isTag && <span ref={tagMarkRef} className="emi-slot-tag-mark" />}
+    </span>
+  )
 }

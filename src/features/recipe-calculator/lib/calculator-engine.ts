@@ -36,6 +36,7 @@ export function buildTree(
   visited: Set<string> = new Set(),
   tagItemSelections: Record<string, string> = {},
   tagFluidSelections: Record<string, string> = {},
+  tagId?: string,
 ): CalcNode {
   const { materialId, kind, amount, depth } = input
 
@@ -58,6 +59,7 @@ export function buildTree(
       catalysts: [],
       availableRecipes: [],
       depth,
+      tagId,
     }
   }
 
@@ -73,6 +75,7 @@ export function buildTree(
       catalysts: [],
       availableRecipes,
       depth,
+      tagId,
     }
   }
 
@@ -89,6 +92,7 @@ export function buildTree(
       catalysts: [],
       availableRecipes,
       depth,
+      tagId,
     }
   }
 
@@ -104,6 +108,7 @@ export function buildTree(
       catalysts: [],
       availableRecipes,
       depth,
+      tagId,
     }
   }
 
@@ -140,6 +145,7 @@ export function buildTree(
       visited,
       tagItemSelections,
       tagFluidSelections,
+      inp.tagId,
     )
     children.push(child)
     catalysts.push(...child.catalysts)
@@ -165,6 +171,7 @@ export function buildTree(
     catalysts: mergeAmounts(catalysts),
     availableRecipes,
     depth,
+    tagId,
   }
 }
 
@@ -185,7 +192,7 @@ export function flattenTree(node: CalcNode): {
       allCatalysts.push(...n.catalysts)
     }
 
-    if (n.recipe === null && (n.availableRecipes?.length ?? 0) === 0 && n.children.length === 0) {
+    if (n.recipe === null && n.children.length === 0) {
       rawMaterials.push({ id: n.materialId, kind: n.kind, amount: n.amount })
       return
     }

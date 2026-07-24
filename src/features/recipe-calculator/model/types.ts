@@ -35,6 +35,7 @@ export interface CalcNode {
   catalysts: CalcMaterial[]
   availableRecipes: CalcRecipeSummary[]
   depth: number
+  tagId?: string
 }
 
 export interface CalculatorTarget {

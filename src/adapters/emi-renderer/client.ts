@@ -86,6 +86,7 @@ export interface EmiRendererClient {
   observePendingRecipeCards(root: HTMLElement, panelKey: string, observeRoot: HTMLElement | null): IconMountSession;
   translateTag(tagId: string, options?: { baseUrl?: string; locale?: string }): Promise<string>;
   showTagPopover(tagId: string, anchorEl: HTMLElement, onSelect: (itemId: string) => void): Promise<void>;
+  getRenderer(): EmiRecipeRenderer;
 }
 
 function mountOptionsFromClient(client: EmiRendererClientImpl): EmiMountOptions {

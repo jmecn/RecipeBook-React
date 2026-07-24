@@ -1,8 +1,9 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useState } from 'react'
 import type { CalcNode } from '../model/types'
 import { MaterialIcon } from './MaterialIcon'
 import { FormattedItemLabel } from '../../../shared/ui/FormattedItemLabel'
 import { formatMaterialAmount, resolveLabel } from '../lib/utils'
+import { RecipeTooltip } from './RecipeTooltip'
 
 interface RecipeTreeNodeProps {
   node: CalcNode
@@ -44,6 +45,14 @@ export function RecipeTreeNode({
   const label = resolveLabel(langLabels, node.materialId)
   const amountDisplay = formatMaterialAmount(node.kind, node.amount)
 
+  const tagSelections = node.tagId
+    ? (node.kind === 'fluid' ? tagFluidSelections : tagItemSelections)
+    : undefined
+  const hasTagSelection = node.tagId ? Boolean(tagSelections![node.tagId]) : false
+
+  const [showTooltip, setShowTooltip] = useState(false)
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 })
+
   const handleClick = useCallback(() => {
     if (hasRecipe) {
       onCollapse(node.materialId)
@@ -52,26 +61,33 @@ export function RecipeTreeNode({
     }
   }, [hasRecipe, node.materialId, onCollapse, onSelectRecipe])
 
+  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+    if (!hasRecipe) return
+    setShowTooltip(true)
+    setTooltipPos({ x: e.clientX + 16, y: e.clientY + 16 })
+  }, [hasRecipe])
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!showTooltip) return
+    setTooltipPos({ x: e.clientX + 16, y: e.clientY + 16 })
+  }, [showTooltip])
+
+  const handleMouseLeave = useCallback(() => {
+    setShowTooltip(false)
+  }, [])
+
   const toggleIcon = hasRecipe ? (isCollapsed ? '\u25B6' : '\u25BC') : '\u25B6'
 
-  const recipeShortId = node.recipe
-    ? node.recipe.recipeId.length > 40
-      ? node.recipe.recipeId.slice(0, 37) + '...'
-      : node.recipe.recipeId
-    : ''
-
   const showChildren = hasRecipe && !isCollapsed
-
-  const tagInputs = useMemo(() => {
-    if (!node.recipe || !showChildren) return []
-    return node.recipe.inputs.filter(inp => inp.tagId && !inp.catalyst)
-  }, [node.recipe, showChildren])
 
   return (
     <div className="calc-tree-node">
       <div
         className={`calc-tree-row${isClickable ? ' is-clickable' : ''}${isRoot ? ' is-root' : ''}`}
         onClick={isClickable ? handleClick : undefined}
+        onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
         onKeyDown={(e) => {
@@ -84,15 +100,45 @@ export function RecipeTreeNode({
           bundleId={bundleId}
           baseUrl={baseUrl}
           locale={locale}
+          isTag={!!node.tagId}
         />
         <div className="calc-tree-label" title={node.materialId}>
           <FormattedItemLabel label={label} className="calc-tree-label-inner" />
         </div>
         <span className="calc-tree-amount">x {amountDisplay}</span>
+        {node.tagId && (
+          <span className="calc-tree-tag-id">#{node.tagId}</span>
+        )}
+        {node.tagId && (
+          <>
+            {hasTagSelection && (
+              <button
+                type="button"
+                className="calc-tree-clear-btn"
+                title="Reset to default"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onClearTagSelection(node.tagId!)
+                }}
+              >
+                &times;
+              </button>
+            )}
+            <button
+              type="button"
+              className="calc-tree-select-btn"
+              title="Select tag item"
+              onClick={(e) => {
+                e.stopPropagation()
+                onSelectTag(node.tagId!, e.currentTarget)
+              }}
+            >
+              {hasTagSelection ? '\u21BB' : '\u00B7\u00B7\u00B7'}
+            </button>
+          </>
+        )}
         {hasRecipe && (
-          <span className="calc-tree-recipe" title={node.recipe?.recipeId}>
-            [{recipeShortId}] {hasAvailableRecipes ? 'x'+node.multiplier : ''}
-          </span>
+          <span className="calc-tree-recipe">x{node.multiplier}</span>
         )}
         {hasRecipe && (
           <button
@@ -113,61 +159,6 @@ export function RecipeTreeNode({
           </span>
         )}
       </div>
-      {tagInputs.length > 0 && (
-        <div className="calc-tree-children">
-          {tagInputs.map((inp) => {
-            const tagId = inp.tagId!
-            const isTagItem = inp.kind === 'item'
-            const tagSelections = isTagItem ? tagItemSelections : tagFluidSelections
-            const selectedId = tagSelections[tagId]
-            const resolvedId = selectedId || inp.id
-            const resolvedLabel = resolveLabel(langLabels, resolvedId)
-            const hasSelection = Boolean(selectedId)
-            return (
-              <div key={tagId} className="calc-tree-row is-tag-input">
-                <span className="calc-tree-toggle">+</span>
-                <MaterialIcon
-                  itemId={resolvedId}
-                  bundleId={bundleId}
-                  baseUrl={baseUrl}
-                  locale={locale}
-                />
-                <div className="calc-tree-label" title={`Tag: ${tagId}`}>
-                  <FormattedItemLabel label={resolvedLabel} className="calc-tree-label-inner" />
-                </div>
-                <span className="calc-tree-tag-id">{tagId.split(':')[1] || tagId}</span>
-                {hasSelection && (
-                  <button
-                    type="button"
-                    className="calc-tree-clear-btn"
-                    title="Reset to default"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onClearTagSelection(tagId)
-                    }}
-                  >
-                    &times;
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="calc-tree-select-btn"
-                  title="Select tag item"
-                  ref={(el) => {
-                    if (el) el.dataset.tagId = tagId
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onSelectTag(tagId, e.currentTarget)
-                  }}
-                >
-                  {hasSelection ? '\u21BB' : '\u00B7\u00B7\u00B7'}
-                </button>
-              </div>
-            )
-          })}
-        </div>
-      )}
       {showChildren && node.children.length > 0 && (
         <div className="calc-tree-children">
           {node.children.map((child, index) => (
@@ -212,6 +203,14 @@ export function RecipeTreeNode({
             )
           })}
         </div>
+      )}
+      {node.recipe && showTooltip && (
+        <RecipeTooltip
+          recipeId={node.recipe.recipeId}
+          x={tooltipPos.x}
+          y={tooltipPos.y}
+          visible={showTooltip}
+        />
       )}
     </div>
   )
