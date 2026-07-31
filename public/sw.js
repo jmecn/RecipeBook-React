@@ -1,6 +1,6 @@
 'use strict';
 
-var CACHE_NAME = 'tfg-recipe-cache-v1';
+var CACHE_NAME = 'recipe-book-react-cache-v1';
 var RECIPE_FILE_PATTERN = /\/bundles\/[^/]+\/recipes\//;
 
 self.addEventListener('install', function (event) {
@@ -15,7 +15,12 @@ self.addEventListener('activate', function (event) {
         var names = await caches.keys();
         return Promise.all(
           names
-            .filter(function (n) { return n.startsWith('tfg-recipe-cache-') && n !== CACHE_NAME; })
+            .filter(function (n) {
+              return (
+                (n.startsWith('tfg-recipe-cache-') || n.startsWith('recipe-book-react-cache-')) &&
+                n !== CACHE_NAME
+              );
+            })
             .map(function (n) { return caches.delete(n); })
         );
       })(),

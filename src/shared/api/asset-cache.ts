@@ -1,4 +1,4 @@
-export const ASSET_CACHE = 'tfg-recipe-viewer-v1';
+export const ASSET_CACHE = 'recipe-book-react-v1';
 
 export async function fetchWithAssetCache(
   url: string,

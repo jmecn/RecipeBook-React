@@ -38,7 +38,7 @@ const manifest = {
 fs.mkdirSync(outDir, { recursive: true })
 fs.writeFileSync(path.join(distDir, 'release-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
 
-const archiveBase = `tfg-recipe-viewer-site-v${version}`
+const archiveBase = `recipe-book-react-site-v${version}`
 const tarPath = path.join(outDir, `${archiveBase}.tar.gz`)
 const zipPath = path.join(outDir, `${archiveBase}.zip`)
 

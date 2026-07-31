@@ -50,8 +50,8 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           TAG="${GITHUB_REF_NAME}"
-          TAR="release/tfg-recipe-viewer-site-v${VERSION}.tar.gz"
-          ZIP="release/tfg-recipe-viewer-site-v${VERSION}.zip"
+          TAR="release/recipe-book-react-site-v${VERSION}.tar.gz"
+          ZIP="release/recipe-book-react-site-v${VERSION}.zip"
           gh release create "$TAG" "$TAR" "$ZIP" \
             --repo "${{ github.repository }}" \
             --title "$TAG" \

@@ -210,17 +210,6 @@ export function RecipeCalculatorPage() {
     });
   }, [baseUrl, locale, langLabels]);
 
-  if (!bundleId) {
-    return (
-      <div className="item-detail-page">
-        <p className="app-empty">{t('noBundle')}</p>
-      </div>
-    );
-  }
-
-  const hasTargets = targets.length > 0;
-  const hasSummary = targetSummaries.size > 0;
-
   const exportJson = useMemo(() => {
     const treeIds = new Set<string>()
     targetSummaries.forEach(s => {
@@ -237,6 +226,17 @@ export function RecipeCalculatorPage() {
       tagFluidSelections,
     }, null, 2)
   }, [state, targetSummaries, tagItemSelections, tagFluidSelections])
+
+  if (!bundleId) {
+    return (
+      <div className="item-detail-page">
+        <p className="app-empty">{t('noBundle')}</p>
+      </div>
+    );
+  }
+
+  const hasTargets = targets.length > 0;
+  const hasSummary = targetSummaries.size > 0;
 
   return (
     <div className="calc-page">
