@@ -61,7 +61,7 @@ export function parseMetaToRecipe(meta: RecipeMetaData, targetItemId: string): C
       inputs.push({
         id: displayId,
         kind: interaction.tagKind === 'fluid' ? 'fluid' : 'item',
-        amount: 1,
+        amount: interaction.amount ?? 1,
         catalyst: role === 'catalyst',
         tagId: interaction.tag,
         tagKind: interaction.tagKind,
