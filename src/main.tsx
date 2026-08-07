@@ -18,7 +18,7 @@ document.body.classList.add('is-booting')
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     const url = siteUrl('sw.js');
-    navigator.serviceWorker.register(url, { scope: siteUrl('') })
+    navigator.serviceWorker.register(url, { scope: siteUrl(''), updateViaCache: 'none' })
       .then(function (reg) {
         if (reg.installing) console.log('[sw] installing');
         else if (reg.waiting) console.log('[sw] waiting (update ready)');
