@@ -107,8 +107,8 @@ export function buildAppUrl(route: AppRoute) {
   const params = new URLSearchParams();
   if (route.bundleToken && route.bundleToken !== '_') params.set('bundle', route.bundleToken);
   if (route.lang) params.set('lang', route.lang);
-  const search = String(route.search || '').trim();
-  if (search) params.set('search', search);
+  const search = String(route.search || '');
+  if (search.trim()) params.set('search', search);
   const page = Number.isFinite(route.page) && route.page > 1 ? Math.floor(route.page) : 1;
   if ((route.view === 'items' || route.view === 'tag') && page > 1) {
     params.set('page', String(page));
