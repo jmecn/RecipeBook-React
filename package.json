@@ -10,6 +10,7 @@
     "dev": "node scripts/sync-locale-manifest.mjs && vite",
     "build": "node scripts/sync-locale-manifest.mjs && tsc && vite build && node scripts/copy-public-static.mjs",
     "lint": "eslint . --max-warnings 0",
+    "test": "node --test \"src/**/*.test.ts\"",
     "preview": "vite preview"
   },
   "dependencies": {

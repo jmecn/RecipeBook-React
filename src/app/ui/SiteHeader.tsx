@@ -9,6 +9,7 @@ import { siteUrl } from '../../shared/lib/site-base';
 import { useBundleMetaQuery, useBundlesManifestQuery } from '../../features/bundle/model/queries';
 import { resolveBundleId } from '../../shared/lib/bundle';
 import { useTheme } from '../../shared/hooks/useTheme';
+import { useSearchHistory } from '../../shared/hooks/useSearchHistory';
 import {
   localeDisplayName,
   useLanguageConfig,
@@ -74,6 +75,7 @@ export function SiteHeader() {
   const bundlesQuery = useBundlesManifestQuery();
   const langConfigQuery = useLanguageConfig();
   const { theme, toggleTheme } = useTheme();
+  const { history, remember } = useSearchHistory();
 
   const bundles = bundlesQuery.data?.bundles ?? [];
   const showBundle = bundles.length > 1;
@@ -149,10 +151,20 @@ export function SiteHeader() {
                   className="site-search-input"
                   value={route.search}
                   onChange={(e) => onSearchChange(e.target.value)}
+                  onBlur={(e) => remember(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') remember(e.currentTarget.value);
+                  }}
                   placeholder={filterPlaceholder(route.view, t('filterItems'), t('filterDetail'))}
                   autoComplete="off"
+                  list="site-search-history"
                 />
               </label>
+              <datalist id="site-search-history">
+                {history.map((term) => (
+                  <option key={term} value={term} />
+                ))}
+              </datalist>
             </div>
             {route.view === 'items' && effectiveBundle ? (
               <CreativeTabFilter bundleId={effectiveBundle} />

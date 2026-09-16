@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getEmiRendererClient } from '../../../adapters/emi-renderer/client';
 import { applyMinecraftFormattedClasses, hasMinecraftFormatting } from '../../../shared/lib/minecraft-text';
 import { buildNavUrl, type AppRoute } from '../../../shared/lib/location-query';
@@ -25,6 +25,7 @@ interface ItemDetailHeaderProps {
 
 export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading, isFavorite = false, onToggleFavorite }: ItemDetailHeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useI18n();
   const handleToggleFavorite = useCallback(() => {
     onToggleFavorite?.(itemId);
@@ -71,7 +72,11 @@ export function ItemDetailHeader({ itemId, baseUrl, locale, route, loading, isFa
         type="button"
         className="item-detail-back"
         aria-label={t('backToItemsAria')}
-        onClick={() => navigate(buildNavUrl(route, { view: 'items', id: null }))}
+        onClick={() => navigate(buildNavUrl(route, {
+          view: 'items',
+          id: null,
+          search: (location.state as { fromSearch?: string } | null)?.fromSearch ?? '',
+        }))}
       >
         ←
       </button>

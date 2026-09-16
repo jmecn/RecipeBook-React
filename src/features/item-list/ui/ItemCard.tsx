@@ -38,6 +38,7 @@ export function ItemCard({ itemId, label, baseUrl, locale, route, isFavorite = f
   return (
     <Link
       to={buildNavUrl(route, { view: 'item', id: itemId, lang: locale })}
+      state={{ fromSearch: route.view === 'items' ? route.search : undefined }}
       className="item-card"
     >
       {onToggleFavorite && (
